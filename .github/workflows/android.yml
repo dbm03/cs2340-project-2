@@ -28,7 +28,15 @@ jobs:
 
     - name: Grant execute permission for gradlew
       run: chmod +x ${{ github.workspace }}/${{ env.BUILD_PATH }}/gradlew
+      working-directory: androidApp
+
+    
     - run: echo "Building Debug APK."
     - name: Build with Gradle
       run: ${{ github.workspace }}/${{ env.BUILD_PATH }}/gradlew build
+      working-directory: androidApp
     - run: echo "Build status report=${{ job.status }}."
+
+    - name: Run tests
+      run: ./gradlew test
+      working-directory: androidApp
