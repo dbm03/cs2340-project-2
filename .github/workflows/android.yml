@@ -19,16 +19,24 @@ jobs:
     - run: echo "The job was automatically triggered by a ${{ github.event_name }} event."
     - run: echo "This job is running on a ${{ runner.os }} server hosted by GitHub!"
     - uses: actions/checkout@v3
-    - name: set up JDK 11
+    - name: set up JDK 17
       uses: actions/setup-java@v3
       with:
-        java-version: '11'
+        java-version: '17'
         distribution: 'temurin'
         cache: gradle
 
     - name: Grant execute permission for gradlew
       run: chmod +x ${{ github.workspace }}/${{ env.BUILD_PATH }}/gradlew
+      working-directory: androidApp
+
+    
     - run: echo "Building Debug APK."
     - name: Build with Gradle
       run: ${{ github.workspace }}/${{ env.BUILD_PATH }}/gradlew build
+      working-directory: androidApp
     - run: echo "Build status report=${{ job.status }}."
+
+    - name: Run tests
+      run: ./gradlew test
+      working-directory: androidApp
