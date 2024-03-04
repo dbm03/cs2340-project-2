@@ -6,6 +6,10 @@ on:
   pull_request:
     branches: [ "main" ]
 
+env:
+  # BUILD_PATH: "." default value when not using subfolders
+  BUILD_PATH: "./androidApp"
+
 jobs:
   build:
 
@@ -23,8 +27,8 @@ jobs:
         cache: gradle
 
     - name: Grant execute permission for gradlew
-      run: chmod +x gradlew
+      run: chmod +x ${{ github.workspace }}/${{ env.BUILD_PATH }}/gradlew
     - run: echo "Building Debug APK."
     - name: Build with Gradle
-      run: ./gradlew build
+      run: ${{ github.workspace }}/${{ env.BUILD_PATH }}/gradlew build
     - run: echo "Build status report=${{ job.status }}."
