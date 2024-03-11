@@ -50,3 +50,8 @@ jobs:
       with:
         args: "--skip-sorting-imports --replace"
         github-token: ${{ secrets.GITHUB_TOKEN }}
+    - name: Squash formatting commit into the previous commit
+      run: |
+        git reset --soft HEAD
+        git commit --amend --no-edit
+        git push origin main --force
