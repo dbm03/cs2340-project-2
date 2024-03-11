@@ -34,7 +34,7 @@ public class MainActivity extends LoginActivity {
 
   private final OkHttpClient mOkHttpClient = new OkHttpClient();
   private String mAccessToken, mAccessCode;
-  private Call mCall;
+  private Call mCall; // Call to m
 
   private TextView tokenTextView, codeTextView, profileTextView;
 
