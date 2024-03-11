@@ -8,4 +8,6 @@ Writing a good guide requires thinking about what your users are trying to do.
 
 ## Further reading
 
+This has been written to test github actions
+
 - Read [about how-to guides](https://diataxis.fr/how-to-guides/) in the Diátaxis framework
