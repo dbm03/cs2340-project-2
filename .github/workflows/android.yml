@@ -3,8 +3,12 @@ name: Android CI
 on:
   push:
     branches: [ "main" ]
+    paths:
+      - 'androidApp/**/*'
   pull_request:
     branches: [ "main" ]
+    paths:
+      - 'androidApp/**/*'
 
 env:
   # BUILD_PATH: "." default value when not using subfolders
