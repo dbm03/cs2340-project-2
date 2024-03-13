@@ -14,4 +14,9 @@ public class SpotifyAPIWrapperUnitTest {
   public void appAuthCorrect() {
     SpotifyAPIWrapper testWrapper = new SpotifyAPIWrapper(new String[] {"Streaming"});
   }
+
+  @Test
+  public void dummyTest() {
+    assertEquals(1, 0);
+  }
 }
