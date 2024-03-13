@@ -58,8 +58,6 @@ jobs:
         github-token: ${{ secrets.GITHUB_TOKEN }}
     - name: Squash formatting commit into the previous commit
       run: |
-        git config --global user.name "Pedro Guillermo Feijóo-García"
-        git config --global user.email "pfeijoo@gatech.edu"
         git reset --soft HEAD~2
         git commit --amend --no-edit
         git push origin main --force

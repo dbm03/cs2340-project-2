@@ -10,8 +10,8 @@ public class SpotifyAPIWrapper {
   public AuthorizationRequest authRequest;
   public AuthorizationResponse authResponse;
 
+  // Authorise application
   public SpotifyAPIWrapper(String[] scopes) {
-    // Authorise application
     AuthorizationRequest.Builder builder =
         new AuthorizationRequest.Builder(CLIENT_ID, AuthorizationResponse.Type.TOKEN, REDIRECT_URI);
 
