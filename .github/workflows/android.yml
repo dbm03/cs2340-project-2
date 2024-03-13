@@ -2,11 +2,9 @@ name: Android CI
 
 on:
   push:
-    branches: [ "main" ]
     paths:
       - 'androidApp/**/*'
   pull_request:
-    branches: [ "main" ]
     paths:
       - 'androidApp/**/*'
 
