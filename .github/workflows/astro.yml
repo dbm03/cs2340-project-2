@@ -7,7 +7,9 @@ name: Deploy Astro site to Pages
 on:
   # Runs on pushes targeting the default branch
   push:
-    branches: ["main"]
+    paths:
+      - 'website/**/*'
+  pull_request:
     paths:
       - 'website/**/*'
 
@@ -78,6 +80,7 @@ jobs:
           path: ${{ env.BUILD_PATH }}/dist
 
   deploy:
+    if: github.ref == 'refs/heads/main'
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
