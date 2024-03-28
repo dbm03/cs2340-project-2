@@ -8,10 +8,11 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.appcompat.app.AppCompatActivity;
+
 import com.spotify.sdk.android.auth.AuthorizationClient;
 import com.spotify.sdk.android.auth.AuthorizationRequest;
 import com.spotify.sdk.android.auth.AuthorizationResponse;
-import com.spotify.sdk.android.auth.LoginActivity;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -24,7 +25,7 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
 
-public class MainActivity extends LoginActivity {
+public class MainActivity extends AppCompatActivity {
 
   public static final String CLIENT_ID = "ab2d3ae0a0ee47a6990b4774ad98c805";
   public static final String REDIRECT_URI = "spotifysdk://auth";
