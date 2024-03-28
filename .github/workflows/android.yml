@@ -45,7 +45,8 @@ jobs:
       working-directory: androidApp
 
   formatting:
-    if: ${{ github.ref != 'refs/heads/main' }}
+    if: github.ref != 'refs/heads/main'
+    needs: build
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3 

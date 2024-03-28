@@ -7,12 +7,17 @@
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:652803372257:android:ffa6a24c7ae110f74bf3a0",
+        "mobilesdk_app_id": "1:652803372257:android:4c28e6e56cccf1374bf3a0",
         "android_client_info": {
-          "package_name": "com.yourcompany.appname"
+          "package_name": "com.team4.spotifywrapped"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "652803372257-s1qap98d872p5n7n7otavh0pe682rsph.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyA_fhstBvL2LsX-YilePUyU6AE_oCdiCgo"
@@ -20,7 +25,12 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "652803372257-s1qap98d872p5n7n7otavh0pe682rsph.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         }
       }
     }
