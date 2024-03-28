@@ -60,4 +60,4 @@ jobs:
       run: |
         git reset --soft HEAD~2
         git commit --amend --no-edit
-        git push origin main --force
+        git push origin $(echo ${GITHUB_REF#refs/heads/}) --force
