@@ -14,10 +14,15 @@ import com.spotify.sdk.android.auth.AuthorizationClient;
 import com.spotify.sdk.android.auth.AuthorizationRequest;
 import com.spotify.sdk.android.auth.AuthorizationResponse;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.*;
 
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -111,50 +116,158 @@ public class MainActivity extends AppCompatActivity {
     }
   }
 
-  /** Get user profile This method will get the user profile using the token */
-  public void onGetUserProfileClicked() {
+  public ArrayList<String> parseObjects(JSONObject json_value, String key){
+    ArrayList<String> hash_vals = new ArrayList<>();
+    try {
+      JSONArray items = (JSONArray) json_value.get("items");
+
+      for (int i = 0; i < items.length(); i++){
+        // Suponiendo que top_artists es un JSONObject y 'items' es un JSONArray dentro de él
+
+        // i es tu índice en el bucle o algún valor específico
+        hash_vals.add(items.get(i).get(key));
+
+      }
+
+    } catch (JSONException e) {
+      Log.d("JSON", "Failed to parse data: " + e);
+      Toast.makeText(
+                      MainActivity.this,
+                      "Failed to parse data, watch Logcat for more details",
+                      Toast.LENGTH_SHORT)
+              .show();
+    }
+
+    return hash_vals;
+
+  }
+  public JSONObject spotifyRequest(String url_parameter){
+    final JSONObject jsonObjectReturnNull = new JSONObject();
     if (mAccessToken == null) {
       Toast.makeText(this, "You need to get an access token first!", Toast.LENGTH_SHORT).show();
-      return;
+      return jsonObjectReturnNull;
     }
 
     // Create a request to get the user profile
     final Request request =
-        new Request.Builder()
-            .url("https://api.spotify.com/v1/me")
-            .addHeader("Authorization", "Bearer " + mAccessToken)
-            .build();
+            new Request.Builder()
+                    .url(url_parameter)
+                    .addHeader("Authorization", "Bearer " + mAccessToken)
+                    .build();
 
     cancelCall();
     mCall = mOkHttpClient.newCall(request);
 
     mCall.enqueue(
-        new Callback() {
-          @Override
-          public void onFailure(Call call, IOException e) {
-            Log.d("HTTP", "Failed to fetch data: " + e);
-            Toast.makeText(
-                    MainActivity.this,
-                    "Failed to fetch data, watch Logcat for more details",
-                    Toast.LENGTH_SHORT)
-                .show();
-          }
+            new Callback() {
+              @Override
+              public void onFailure(Call call, IOException e) {
+                Log.d("HTTP", "Failed to fetch data: " + e);
+                Toast.makeText(
+                                MainActivity.this,
+                                "Failed to fetch data, watch Logcat for more details",
+                                Toast.LENGTH_SHORT)
+                        .show();
+              }
 
-          @Override
-          public void onResponse(Call call, Response response) throws IOException {
-            try {
-              final JSONObject jsonObject = new JSONObject(response.body().string());
-              setTextAsync(jsonObject.toString(3), profileTextView);
-            } catch (JSONException e) {
-              Log.d("JSON", "Failed to parse data: " + e);
-              Toast.makeText(
+              @Override
+              public void onResponse(Call call, Response response) throws IOException {
+                try {
+                  final JSONObject jsonObject = new JSONObject(response.body().string());
+                  setTextAsync(jsonObject.toString(3), profileTextView);
+                } catch (JSONException e) {
+                  Log.d("JSON", "Failed to parse data: " + e);
+                  Toast.makeText(
+                                  MainActivity.this,
+                                  "Failed to parse data, watch Logcat for more details",
+                                  Toast.LENGTH_SHORT)
+                          .show();
+                }
+              }
+            });
+    return jsonObjectReturnNull;
+  }
+  /** Get user profile This method will get the user profile using the token */
+  public JSONObject onGetUserProfileClicked() {
+    String url = "https://api.spotify.com/v1/me";
+    return spotifyRequest(url);
+  }
+
+
+  public JSONObject onGetUserMostListenSongs(String timeFrame) {
+    String url = "https://api.spotify.com/v1/me/top/tracks?time_range=" + timeFrame + "&limit=5&offset=0";
+    return spotifyRequest(url);
+  }
+
+  public JSONObject onGetUserMostListenArtists(String timeFrame) {
+    String url = "https://api.spotify.com/v1/me/top/artists?time_range=" + timeFrame + "&limit=5&offset=0";
+    return spotifyRequest(url);
+  }
+
+  public LinkedHashMap<String, Integer> onGetUserMostListenGenres(String timeFrame) {
+    String url = "https://api.spotify.com/v1/me/top/artists?time_range=" + timeFrame + "&limit=5&offset=0";
+    JSONObject top_artists = spotifyRequest(url);
+    HashMap<String, Integer> genres = new HashMap<>();
+    try {
+      JSONArray items = top_artists.getJSONArray("items");
+
+      for (int i = 0; i < items.length(); i++){
+        // Suponiendo que top_artists es un JSONObject y 'items' es un JSONArray dentro de él
+
+        // i es tu índice en el bucle o algún valor específico
+        JSONObject artist = items.getJSONObject(i);
+        JSONArray genre_aux = artist.getJSONArray("genres");
+
+        // Convertir JSONArray a ArrayList<String>
+        ArrayList<String> artist_genres = new ArrayList<>();
+        for (int j = 0; j < genre_aux.length(); j++) {
+          artist_genres.add(genre_aux.getString(j));
+        }
+        for (int j = 0; j < artist_genres.size(); j++){
+          if (genres.containsKey(artist_genres.get(j))){
+            int num_rep = genres.get(artist_genres.get(j));
+            genres.put(artist_genres.get(j), num_rep + 1);
+          }
+          else{
+            genres.put(artist_genres.get(j), 1);
+          }
+        }
+      }
+
+    } catch (JSONException e) {
+      Log.d("JSON", "Failed to parse data: " + e);
+      Toast.makeText(
                       MainActivity.this,
                       "Failed to parse data, watch Logcat for more details",
                       Toast.LENGTH_SHORT)
-                  .show();
-            }
-          }
-        });
+              .show();
+    }
+    List<Map.Entry<String, Integer>> list = new ArrayList<>(genres.entrySet());
+
+    list.sort(Map.Entry.<String, Integer>comparingByValue().reversed());
+
+    int limit = Math.min(list.size(), 5);
+
+    LinkedHashMap<String, Integer> top5 = new LinkedHashMap<>();
+
+    for (int i = 0; i < limit; i++) {
+      Map.Entry<String, Integer> entry = list.get(i);
+      top5.put(entry.getKey(), entry.getValue());
+    }
+
+    return top5;
+
+  }
+
+  public JSONObject getRecommendations(){
+    JSONObject songs_recommendation = onGetUserMostListenSongs("long_term");
+    JSONObject artist_recommendation = onGetUserMostListenArtists("long_term");
+    ArrayList<String> songs_recom = parseObjects(songs_recommendation, "id");
+    ArrayList<String> artist_recom = parseObjects(artist_recommendation, "id");
+    String res_song = String.join("%2C", songs_recom);
+    String res_artist = String.join("%2C", artist_recom);
+    String url = "https://api.spotify.com/v1/recommendations?market=US&seed_artists="+res_artist +"&seed_tracks="+res_song;
+    return spotifyRequest(url);
   }
 
   /**
@@ -178,7 +291,7 @@ public class MainActivity extends AppCompatActivity {
     return new AuthorizationRequest.Builder(CLIENT_ID, type, getRedirectUri().toString())
         .setShowDialog(false)
         .setScopes(
-            new String[] {"user-read-email"}) // <--- Change the scope of your requested token here
+                new String[] {"user-read-email", "user-top-read"}) // <--- Change the scope of your requested token here
         .setCampaign("your-campaign-token")
         .build();
   }
