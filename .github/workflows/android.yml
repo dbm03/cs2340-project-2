@@ -4,9 +4,6 @@ on:
   push:
     paths:
       - 'androidApp/**/*'
-  pull_request:
-    paths:
-      - 'androidApp/**/*'
 
 env:
   # BUILD_PATH: "." default value when not using subfolders
