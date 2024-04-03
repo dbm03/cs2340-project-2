@@ -58,6 +58,7 @@ public class MainActivity extends AppCompatActivity {
     Button tokenBtn = (Button) findViewById(R.id.token_btn);
     Button codeBtn = (Button) findViewById(R.id.code_btn);
     Button profileBtn = (Button) findViewById(R.id.profile_btn);
+    Button jsonBtn = (Button) findViewById(R.id.JSON_btn);
 
     // Set the click listeners for the buttons
 
@@ -74,6 +75,11 @@ public class MainActivity extends AppCompatActivity {
     profileBtn.setOnClickListener(
         (v) -> {
           onGetUserProfileClicked();
+        });
+
+    jsonBtn.setOnClickListener(
+        (v) -> {
+          onGetUserMostListenArtists("long_term");
         });
   }
 
@@ -173,7 +179,8 @@ public class MainActivity extends AppCompatActivity {
           public void onResponse(Call call, Response response) throws IOException {
             try {
               final JSONObject jsonObject = new JSONObject(response.body().string());
-              setTextAsync(jsonObject.toString(3), profileTextView);
+              getSongsAsync(jsonObject, profileTextView);
+              //setTextAsync(jsonObject.toString(3), profileTextView);
             } catch (JSONException e) {
               Log.d("JSON", "Failed to parse data: " + e);
               Toast.makeText(
@@ -515,6 +522,12 @@ public class MainActivity extends AppCompatActivity {
    */
   private void setTextAsync(final String text, TextView textView) {
     runOnUiThread(() -> textView.setText(text));
+  }
+
+  private void getSongsAsync(final JSONObject json, TextView textView) {
+    ArrayList<String> text = parseObjects(json, "name");
+    String text_str = String.join(", ", text);
+    runOnUiThread(() -> textView.setText(text_str));
   }
 
   /**

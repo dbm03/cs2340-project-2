@@ -60,6 +60,12 @@
                 android:layout_weight="1"
                 android:text="Get User Profile" />
         </LinearLayout>
+
+        <Button
+            android:id="@+id/JSON_btn"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="json" />
     </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
