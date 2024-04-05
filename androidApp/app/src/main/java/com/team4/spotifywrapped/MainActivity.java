@@ -1,9 +1,12 @@
 package com.team4.spotifywrapped;
 
+import static java.lang.Thread.sleep;
+
 import android.os.Bundle;
 import android.content.Intent;
 import android.net.Uri;
 import android.util.Log;
+import android.util.Pair;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -38,6 +41,16 @@ public class MainActivity extends AppCompatActivity {
   public static final int AUTH_TOKEN_REQUEST_CODE = 0;
   public static final int AUTH_CODE_REQUEST_CODE = 1;
 
+  // Private array to store the top 5 genres
+  private ArrayList<String> top5Songs = new ArrayList<>();
+  private ArrayList<String> top5Artists = new ArrayList<>();
+  private ArrayList<String> top5Songs_id = new ArrayList<>();
+  private ArrayList<String> top5Artists_id = new ArrayList<>();
+  private Map<String, String> recommendations = new HashMap<>();
+  private Map<String, Integer> genres = new HashMap<>();
+  private Map<String, Pair<String, String>> playlists = new HashMap<>();
+  private Map<String, ArrayList<String>> playlist_songs = new HashMap<>();
+
   private final OkHttpClient mOkHttpClient = new OkHttpClient();
   private String mAccessToken, mAccessCode;
   private Call mCall;
@@ -59,12 +72,16 @@ public class MainActivity extends AppCompatActivity {
     Button codeBtn = (Button) findViewById(R.id.code_btn);
     Button profileBtn = (Button) findViewById(R.id.profile_btn);
     Button jsonBtn = (Button) findViewById(R.id.JSON_btn);
+    Button jsonBtn2 = (Button) findViewById(R.id.JSON_btn2);
+    Button genreBtn = (Button) findViewById(R.id.genre_btn);
+    Button gameBtn = (Button) findViewById(R.id.game_btn);
 
     // Set the click listeners for the buttons
 
     tokenBtn.setOnClickListener(
         (v) -> {
           getToken();
+          System.out.println(top5Songs);
         });
 
     codeBtn.setOnClickListener(
@@ -74,12 +91,31 @@ public class MainActivity extends AppCompatActivity {
 
     profileBtn.setOnClickListener(
         (v) -> {
-          onGetUserProfileClicked();
+          getRecommendations();
         });
 
     jsonBtn.setOnClickListener(
         (v) -> {
           onGetUserMostListenArtists("long_term");
+        });
+
+    jsonBtn2.setOnClickListener(
+        (v) -> {
+          onGetUserMostListenSongs("long_term");
+        });
+
+    genreBtn.setOnClickListener(
+        (v) -> {
+          onGetUserMostListenGenres("long_term");
+        });
+
+    gameBtn.setOnClickListener(
+        (v) -> {
+          try {
+            play_game();
+          } catch (InterruptedException e) {
+            e.printStackTrace();
+          }
         });
   }
 
@@ -108,7 +144,6 @@ public class MainActivity extends AppCompatActivity {
   @Override
   protected void onActivityResult(int requestCode, int resultCode, Intent data) {
     super.onActivityResult(requestCode, resultCode, data);
-    System.out.println("HELLO" + data);
     final AuthorizationResponse response = AuthorizationClient.getResponse(resultCode, data);
 
     // Check which request code is present (if any)
@@ -134,6 +169,114 @@ public class MainActivity extends AppCompatActivity {
         JSONObject item = (JSONObject) items.get(i);
         // Now you can safely call get(key) on the JSONObject
         hash_vals.add(item.getString(key)); // Use getString to directly get the String value
+      }
+
+    } catch (JSONException e) {
+      Log.d("JSON", "Failed to parse data: " + e);
+      Toast.makeText(
+              MainActivity.this,
+              "Failed to parse data, watch Logcat for more details",
+              Toast.LENGTH_SHORT)
+          .show();
+    }
+
+    return hash_vals;
+  }
+
+  public Map<String, String> parseRecommendations(JSONObject json_value) {
+    Map<String, String> hash_vals = new HashMap<>();
+    try {
+      JSONArray items = (JSONArray) json_value.get("tracks");
+
+      for (int i = 0; i < items.length(); i++) {
+        // Suponiendo que top_artists es un JSONObject y 'items' es un JSONArray dentro de él
+
+        // i es tu índice en el bucle o algún valor específico
+        JSONObject item = (JSONObject) items.get(i);
+        // Get artists
+        JSONArray artists = item.getJSONArray("artists");
+        String artist = "";
+        for (int j = 0; j < artists.length(); j++) {
+          JSONObject artist_obj = artists.getJSONObject(j);
+          artist += artist_obj.getString("name");
+          if (j < artists.length() - 1) {
+            artist += ", ";
+          }
+        }
+        // Now you can safely call get(key) on the JSONObject
+        hash_vals.put(
+            item.getString("name"), artist); // Use getString to directly get the String value
+      }
+
+    } catch (JSONException e) {
+      Log.d("JSON", "Failed to parse data: " + e);
+      Toast.makeText(
+              MainActivity.this,
+              "Failed to parse data, watch Logcat for more details",
+              Toast.LENGTH_SHORT)
+          .show();
+    }
+
+    return hash_vals;
+  }
+
+  public Map<String, Integer> parseGenres(JSONObject json_value) {
+    Map<String, Integer> hash_vals = new HashMap<>();
+    try {
+      JSONArray items = (JSONArray) json_value.get("items");
+
+      for (int i = 0; i < items.length(); i++) {
+        // Suponiendo que top_artists es un JSONObject y 'items' es un JSONArray dentro de él
+
+        // i es tu índice en el bucle o algún valor específico
+        JSONObject item = (JSONObject) items.get(i);
+        // Now you can safely call get(key) on the JSONObject
+        JSONArray genres = item.getJSONArray("genres");
+        for (int j = 0; j < genres.length(); j++) {
+          String genre = genres.getString(j);
+          if (hash_vals.containsKey(genre)) {
+            hash_vals.put(genre, hash_vals.get(genre) + 1);
+          } else {
+            hash_vals.put(genre, 1);
+          }
+        }
+      }
+
+    } catch (JSONException e) {
+      Log.d("JSON", "Failed to parse data: " + e);
+      Toast.makeText(
+              MainActivity.this,
+              "Failed to parse data, watch Logcat for more details",
+              Toast.LENGTH_SHORT)
+          .show();
+    }
+
+    return hash_vals;
+  }
+
+  public Map<String, Pair<String, String>> parsePlaylist(JSONObject json_value) {
+    Map<String, Pair<String, String>> hash_vals = new HashMap<>();
+    try {
+      JSONArray items = (JSONArray) json_value.get("items");
+
+      for (int i = 0; i < items.length(); i++) {
+        // Suponiendo que top_artists es un JSONObject y 'items' es un JSONArray dentro de él
+
+        // i es tu índice en el bucle o algún valor específico
+        JSONObject item = (JSONObject) items.get(i);
+        // Now you can safely call get(key) on the JSONObject
+        // Get the image
+        JSONArray images = item.getJSONArray("images");
+        String image = "";
+        if (images.length() > 0) {
+          JSONObject image_obj = images.getJSONObject(0);
+          image = image_obj.getString("url");
+        }
+
+        hash_vals.put(
+            item.getString("name"),
+            new Pair<>(
+                item.getString("id"), image)); // Use getString to directly get the String value
       }
 
     } catch (JSONException e) {
@@ -179,8 +322,227 @@ public class MainActivity extends AppCompatActivity {
           public void onResponse(Call call, Response response) throws IOException {
             try {
               final JSONObject jsonObject = new JSONObject(response.body().string());
-              getSongsAsync(jsonObject, profileTextView);
-              //setTextAsync(jsonObject.toString(3), profileTextView);
+              setTextAsync(jsonObject.toString(3), profileTextView);
+            } catch (JSONException e) {
+              Log.d("JSON", "Failed to parse data: " + e);
+              Toast.makeText(
+                      MainActivity.this,
+                      "Failed to parse data, watch Logcat for more details",
+                      Toast.LENGTH_SHORT)
+                  .show();
+            }
+          }
+        });
+  }
+
+  public void spotifyRequest_song(String url_parameter) {
+    if (mAccessToken == null) {
+      Toast.makeText(this, "You need to get an access token first!", Toast.LENGTH_SHORT).show();
+    }
+
+    // Create a request to get the user profile
+    final Request request =
+        new Request.Builder()
+            .url(url_parameter)
+            .addHeader("Authorization", "Bearer " + mAccessToken)
+            .build();
+
+    cancelCall();
+    mCall = mOkHttpClient.newCall(request);
+
+    mCall.enqueue(
+        new Callback() {
+          @Override
+          public void onFailure(Call call, IOException e) {
+            Log.d("HTTP", "Failed to fetch data: " + e);
+            Toast.makeText(
+                    MainActivity.this,
+                    "Failed to fetch data, watch Logcat for more details",
+                    Toast.LENGTH_SHORT)
+                .show();
+          }
+
+          @Override
+          public void onResponse(Call call, Response response) throws IOException {
+            try {
+              final JSONObject jsonObject = new JSONObject(response.body().string());
+              display_and_save_song(jsonObject, profileTextView);
+            } catch (JSONException e) {
+              Log.d("JSON", "Failed to parse data: " + e);
+              Toast.makeText(
+                      MainActivity.this,
+                      "Failed to parse data, watch Logcat for more details",
+                      Toast.LENGTH_SHORT)
+                  .show();
+            }
+          }
+        });
+  }
+
+  public void spotifyRequest_artist(String url_parameter) {
+    if (mAccessToken == null) {
+      Toast.makeText(this, "You need to get an access token first!", Toast.LENGTH_SHORT).show();
+    }
+
+    // Create a request to get the user profile
+    final Request request =
+        new Request.Builder()
+            .url(url_parameter)
+            .addHeader("Authorization", "Bearer " + mAccessToken)
+            .build();
+
+    cancelCall();
+    mCall = mOkHttpClient.newCall(request);
+
+    mCall.enqueue(
+        new Callback() {
+          @Override
+          public void onFailure(Call call, IOException e) {
+            Log.d("HTTP", "Failed to fetch data: " + e);
+            Toast.makeText(
+                    MainActivity.this,
+                    "Failed to fetch data, watch Logcat for more details",
+                    Toast.LENGTH_SHORT)
+                .show();
+          }
+
+          @Override
+          public void onResponse(Call call, Response response) throws IOException {
+            try {
+              final JSONObject jsonObject = new JSONObject(response.body().string());
+              display_and_save_artist(jsonObject, profileTextView);
+            } catch (JSONException e) {
+              Log.d("JSON", "Failed to parse data: " + e);
+              Toast.makeText(
+                      MainActivity.this,
+                      "Failed to parse data, watch Logcat for more details",
+                      Toast.LENGTH_SHORT)
+                  .show();
+            }
+          }
+        });
+  }
+
+  public void spotifyRequest_recommendation(String url_parameter) {
+    if (mAccessToken == null) {
+      Toast.makeText(this, "You need to get an access token first!", Toast.LENGTH_SHORT).show();
+    }
+
+    // Create a request to get the user profile
+    final Request request =
+        new Request.Builder()
+            .url(url_parameter)
+            .addHeader("Authorization", "Bearer " + mAccessToken)
+            .build();
+
+    cancelCall();
+    mCall = mOkHttpClient.newCall(request);
+
+    mCall.enqueue(
+        new Callback() {
+          @Override
+          public void onFailure(Call call, IOException e) {
+            Log.d("HTTP", "Failed to fetch data: " + e);
+            Toast.makeText(
+                    MainActivity.this,
+                    "Failed to fetch data, watch Logcat for more details",
+                    Toast.LENGTH_SHORT)
+                .show();
+          }
+
+          @Override
+          public void onResponse(Call call, Response response) throws IOException {
+            try {
+              final JSONObject jsonObject = new JSONObject(response.body().string());
+              display_and_save_recommendation(jsonObject, profileTextView);
+            } catch (JSONException e) {
+              Log.d("JSON", "Failed to parse data: " + e);
+              Toast.makeText(
+                      MainActivity.this,
+                      "Failed to parse data, watch Logcat for more details",
+                      Toast.LENGTH_SHORT)
+                  .show();
+            }
+          }
+        });
+  }
+
+  public void spotifyRequest_genres(String url_parameter) {
+    if (mAccessToken == null) {
+      Toast.makeText(this, "You need to get an access token first!", Toast.LENGTH_SHORT).show();
+    }
+
+    // Create a request to get the user profile
+    final Request request =
+        new Request.Builder()
+            .url(url_parameter)
+            .addHeader("Authorization", "Bearer " + mAccessToken)
+            .build();
+
+    cancelCall();
+    mCall = mOkHttpClient.newCall(request);
+
+    mCall.enqueue(
+        new Callback() {
+          @Override
+          public void onFailure(Call call, IOException e) {
+            Log.d("HTTP", "Failed to fetch data: " + e);
+            Toast.makeText(
+                    MainActivity.this,
+                    "Failed to fetch data, watch Logcat for more details",
+                    Toast.LENGTH_SHORT)
+                .show();
+          }
+
+          @Override
+          public void onResponse(Call call, Response response) throws IOException {
+            try {
+              final JSONObject jsonObject = new JSONObject(response.body().string());
+              display_and_save_genres(jsonObject, profileTextView);
+            } catch (JSONException e) {
+              Log.d("JSON", "Failed to parse data: " + e);
+              Toast.makeText(
+                      MainActivity.this,
+                      "Failed to parse data, watch Logcat for more details",
+                      Toast.LENGTH_SHORT)
+                  .show();
+            }
+          }
+        });
+  }
+
+  public void spotifyRequest_playlist(String url_parameter) {
+    if (mAccessToken == null) {
+      Toast.makeText(this, "You need to get an access token first!", Toast.LENGTH_SHORT).show();
+    }
+
+    // Create a request to get the user profile
+    final Request request =
+        new Request.Builder()
+            .url(url_parameter)
+            .addHeader("Authorization", "Bearer " + mAccessToken)
+            .build();
+
+    cancelCall();
+    mCall = mOkHttpClient.newCall(request);
+
+    mCall.enqueue(
+        new Callback() {
+          @Override
+          public void onFailure(Call call, IOException e) {
+            Log.d("HTTP", "Failed to fetch data: " + e);
+            Toast.makeText(
+                    MainActivity.this,
+                    "Failed to fetch data, watch Logcat for more details",
+                    Toast.LENGTH_SHORT)
+                .show();
+          }
+
+          @Override
+          public void onResponse(Call call, Response response) throws IOException {
+            try {
+              final JSONObject jsonObject = new JSONObject(response.body().string());
+              save_playlist(jsonObject, profileTextView);
             } catch (JSONException e) {
               Log.d("JSON", "Failed to parse data: " + e);
               Toast.makeText(
@@ -202,210 +564,32 @@ public class MainActivity extends AppCompatActivity {
   public void onGetUserMostListenSongs(String timeFrame) {
     String url =
         "https://api.spotify.com/v1/me/top/tracks?time_range=" + timeFrame + "&limit=5&offset=0";
-    spotifyRequest(url);
+    spotifyRequest_song(url);
   }
 
   public void onGetUserMostListenArtists(String timeFrame) {
 
     String url =
         "https://api.spotify.com/v1/me/top/artists?time_range=" + timeFrame + "&limit=5&offset=0";
-    spotifyRequest(url);
+    spotifyRequest_artist(url);
   }
 
   public void onGetUserMostListenGenres(String timeFrame) {
-    String url =
-        "https://api.spotify.com/v1/me/top/artists?time_range=" + timeFrame + "&limit=5&offset=0";
-    if (mAccessToken == null) {
-      Toast.makeText(this, "You need to get an access token first!", Toast.LENGTH_SHORT).show();
-    }
-
-    // Create a request to get the user profile
-    final Request request =
-        new Request.Builder().url(url).addHeader("Authorization", "Bearer " + mAccessToken).build();
-
-    cancelCall();
-    mCall = mOkHttpClient.newCall(request);
-
-    mCall.enqueue(
-        new Callback() {
-          @Override
-          public void onFailure(Call call, IOException e) {
-            Log.d("HTTP", "Failed to fetch data: " + e);
-            Toast.makeText(
-                    MainActivity.this,
-                    "Failed to fetch data, watch Logcat for more details",
-                    Toast.LENGTH_SHORT)
-                .show();
-          }
-
-          @Override
-          public void onResponse(Call call, Response response) throws IOException {
-            try {
-              final JSONObject top_artists = new JSONObject(response.body().string());
-              // setTextAsync(jsonObject.toString(3), profileTextView);
-              // JSONObject top_artists = spotifyRequest(url);
-              HashMap<String, Integer> genres = new HashMap<>();
-              try {
-                JSONArray items = top_artists.getJSONArray("items");
-
-                for (int i = 0; i < items.length(); i++) {
-                  // Suponiendo que top_artists es un JSONObject y 'items' es un JSONArray dentro de
-                  // él
-
-                  // i es tu índice en el bucle o algún valor específico
-                  JSONObject artist = items.getJSONObject(i);
-                  JSONArray genre_aux = artist.getJSONArray("genres");
-
-                  // Convertir JSONArray a ArrayList<String>
-                  ArrayList<String> artist_genres = new ArrayList<>();
-                  for (int j = 0; j < genre_aux.length(); j++) {
-                    artist_genres.add(genre_aux.getString(j));
-                  }
-                  for (int j = 0; j < artist_genres.size(); j++) {
-                    if (genres.containsKey(artist_genres.get(j))) {
-                      int num_rep = genres.get(artist_genres.get(j));
-                      genres.put(artist_genres.get(j), num_rep + 1);
-                    } else {
-                      genres.put(artist_genres.get(j), 1);
-                    }
-                  }
-                }
-
-              } catch (JSONException e) {
-                Log.d("JSON", "Failed to parse data: " + e);
-                Toast.makeText(
-                        MainActivity.this,
-                        "Failed to parse data, watch Logcat for more details",
-                        Toast.LENGTH_SHORT)
-                    .show();
-              }
-              List<Map.Entry<String, Integer>> list = new ArrayList<>(genres.entrySet());
-
-              list.sort(Map.Entry.<String, Integer>comparingByValue().reversed());
-
-              int limit = Math.min(list.size(), 5);
-
-              LinkedHashMap<String, Integer> top5 = new LinkedHashMap<>();
-
-              for (int i = 0; i < limit; i++) {
-                Map.Entry<String, Integer> entry = list.get(i);
-                top5.put(entry.getKey(), entry.getValue());
-              }
-
-            } catch (JSONException e) {
-              Log.d("JSON", "Failed to parse data: " + e);
-              Toast.makeText(
-                      MainActivity.this,
-                      "Failed to parse data, watch Logcat for more details",
-                      Toast.LENGTH_SHORT)
-                  .show();
-            }
-          }
-        });
+    String url = "https://api.spotify.com/v1/me/top/artists?time_range=" + timeFrame + "&offset=0";
+    spotifyRequest_genres(url);
   }
 
   public void getRecommendations() {
-    String url_songs =
-        "https://api.spotify.com/v1/me/top/tracks?time_range=long_term&limit=5&offset=0";
-    String url_artists =
-        "https://api.spotify.com/v1/me/top/artists?time_range=long_term&limit=5&offset=0";
-
-    if (mAccessToken == null) {
-      Toast.makeText(this, "You need to get an access token first!", Toast.LENGTH_SHORT).show();
+    if (top5Songs_id.isEmpty()) {
+      Toast.makeText(this, "You need to get your top 5 songs first!", Toast.LENGTH_SHORT).show();
+      return;
     }
-
-    // Create a request to get the user profile
-    final Request request =
-        new Request.Builder()
-            .url(url_songs)
-            .addHeader("Authorization", "Bearer " + mAccessToken)
-            .build();
-
-    cancelCall();
-    mCall = mOkHttpClient.newCall(request);
-
-    mCall.enqueue(
-        new Callback() {
-          @Override
-          public void onFailure(Call call, IOException e) {
-            Log.d("HTTP", "Failed to fetch data: " + e);
-            Toast.makeText(
-                    MainActivity.this,
-                    "Failed to fetch data, watch Logcat for more details",
-                    Toast.LENGTH_SHORT)
-                .show();
-          }
-
-          @Override
-          public void onResponse(Call call, Response response) throws IOException {
-            try {
-              final JSONObject songs_recommendation = new JSONObject(response.body().string());
-              // setTextAsync(jsonObject.toString(3), profileTextView);
-              ArrayList<String> songs_recom = parseObjects(songs_recommendation, "id");
-              String res_song = String.join("%2C", songs_recom);
-              String url =
-                  "https://api.spotify.com/v1/recommendations?market=US&seed_tracks=" + res_song;
-              spotifyRequest(url);
-            } catch (JSONException e) {
-              Log.d("JSON", "Failed to parse data: " + e);
-              Toast.makeText(
-                      MainActivity.this,
-                      "Failed to parse data, watch Logcat for more details",
-                      Toast.LENGTH_SHORT)
-                  .show();
-            }
-          }
-        });
-
-    if (mAccessToken == null) {
-      Toast.makeText(this, "You need to get an access token first!", Toast.LENGTH_SHORT).show();
-    }
-
-    // Create a request to get the user profile
-    final Request request2 =
-        new Request.Builder()
-            .url(url_artists)
-            .addHeader("Authorization", "Bearer " + mAccessToken)
-            .build();
-
-    cancelCall();
-    mCall = mOkHttpClient.newCall(request2);
-
-    mCall.enqueue(
-        new Callback() {
-          @Override
-          public void onFailure(Call call, IOException e) {
-            Log.d("HTTP", "Failed to fetch data: " + e);
-            Toast.makeText(
-                    MainActivity.this,
-                    "Failed to fetch data, watch Logcat for more details",
-                    Toast.LENGTH_SHORT)
-                .show();
-          }
-
-          @Override
-          public void onResponse(Call call, Response response) throws IOException {
-            try {
-              final JSONObject artist_recommendation = new JSONObject(response.body().string());
-              // setTextAsync(jsonObject.toString(3), profileTextView);
-              ArrayList<String> artist_recom = parseObjects(artist_recommendation, "id");
-              String res_artist = String.join("%2C", artist_recom);
-              String url_artists =
-                  "https://api.spotify.com/v1/recommendations?market=US&seed_artists=" + res_artist;
-              spotifyRequest(url_artists);
-            } catch (JSONException e) {
-              Log.d("JSON", "Failed to parse data: " + e);
-              Toast.makeText(
-                      MainActivity.this,
-                      "Failed to parse data, watch Logcat for more details",
-                      Toast.LENGTH_SHORT)
-                  .show();
-            }
-          }
-        });
+    String song_ids = String.join("%2C", top5Songs_id);
+    String url = "https://api.spotify.com/v1/recommendations?&limit=5&seed_tracks=" + song_ids;
+    spotifyRequest_recommendation(url);
   }
 
-  private void getTracksFromPlaylist(String playlistId) {
+  private void spotifyRequest_playlist_songs(String playlistId) {
     String url_tracks = "https://api.spotify.com/v1/playlists/" + playlistId + "/tracks";
     Request request =
         new Request.Builder()
@@ -425,12 +609,7 @@ public class MainActivity extends AppCompatActivity {
           public void onResponse(Call call, Response response) throws IOException {
             try {
               final JSONObject jsonObject = new JSONObject(response.body().string());
-              JSONArray tracks = jsonObject.getJSONArray("items");
-              int randomTrackIndex = new Random().nextInt(tracks.length());
-              JSONObject randomTrack =
-                  tracks.getJSONObject(randomTrackIndex).getJSONObject("track");
-              String trackName = randomTrack.getString("name");
-              String trackId = randomTrack.getString("id");
+              save_songs_from_playlist(jsonObject, playlistId);
 
             } catch (JSONException e) {
               Log.d("JSON", "Failed to parse data: " + e);
@@ -446,71 +625,71 @@ public class MainActivity extends AppCompatActivity {
         });
   }
 
-  public void gameMode(String url_parameter) {
-    String url_playlist = "https://api.spotify.com/v1/me/playlists";
-    if (mAccessToken == null) {
-      Toast.makeText(this, "You need to get an access token first!", Toast.LENGTH_SHORT).show();
+  private void play_game() throws InterruptedException {
+    getPlaylists();
+    sleep(2000);
+
+    // Get all the songs from the playlists
+    for (Map.Entry<String, Pair<String, String>> entry : playlists.entrySet()) {
+      // Use id to get the songs
+      spotifyRequest_playlist_songs(entry.getValue().first);
+    }
+    sleep(3000);
+    // Choose a random playlist and a random song from that playlist
+    Random rand = new Random();
+    int randomPlaylistIndex = rand.nextInt(playlists.size());
+    String randomPlaylist = (String) playlists.keySet().toArray()[randomPlaylistIndex];
+    String randomPlaylistId = playlists.get(randomPlaylist).first;
+    ArrayList<String> songs = playlist_songs.get(randomPlaylistId);
+    int randomSongIndex = rand.nextInt(songs.size());
+    String randomSong = songs.get(randomSongIndex);
+
+    // Choose 2 more playlists that don't contain the random song that was chosen
+    ArrayList<String> playlists_without_song = new ArrayList<>();
+    for (Map.Entry<String, Pair<String, String>> entry : playlists.entrySet()) {
+      if (!playlist_songs.get(entry.getValue().first).contains(randomSong)) {
+        playlists_without_song.add(entry.getKey());
+      }
+    }
+    // print the song, the playlist and the other 2 playlists
+    String txt =
+        "Song: "
+            + randomSong
+            + "(Original Playlist: "
+            + randomPlaylist
+            + ")\nChoose the playlist: ";
+    // Print 3 playlists, randomize in which order the original playlist is shown
+    // It can either be the first, second or third
+    int randomOrder = rand.nextInt(3);
+    if (randomOrder == 0) {
+      txt += randomPlaylist + "\n";
+      // Choose randomly another playlist from the ones that don't contain the song
+      String playlist1 = playlists_without_song.get(rand.nextInt(playlists_without_song.size()));
+      txt += playlist1 + "\n";
+      // Delete the playlist that was chosen from the list
+      playlists_without_song.remove(playlist1);
+      txt += playlists_without_song.get(rand.nextInt(playlists_without_song.size())) + "\n";
+    } else if (randomOrder == 1) {
+      String playlist1 = playlists_without_song.get(rand.nextInt(playlists_without_song.size()));
+      txt += playlist1 + "\n";
+      playlists_without_song.remove(playlist1);
+      txt += randomPlaylist + "\n";
+      txt += playlists_without_song.get(rand.nextInt(playlists_without_song.size())) + "\n";
+    } else {
+      String playlist1 = playlists_without_song.get(rand.nextInt(playlists_without_song.size()));
+      txt += playlist1 + "\n";
+      playlists_without_song.remove(playlist1);
+      txt += playlists_without_song.get(rand.nextInt(playlists_without_song.size())) + "\n";
+      txt += randomPlaylist + "\n";
     }
 
-    // Create a request to get the user profile
-    final Request request =
-        new Request.Builder()
-            .url(url_playlist)
-            .addHeader("Authorization", "Bearer " + mAccessToken)
-            .build();
+    String finalTxt = txt;
+    runOnUiThread(() -> profileTextView.setText(finalTxt));
+  }
 
-    cancelCall();
-    mCall = mOkHttpClient.newCall(request);
-
-    mCall.enqueue(
-        new Callback() {
-          @Override
-          public void onFailure(Call call, IOException e) {
-            Log.d("HTTP", "Failed to fetch data: " + e);
-            Toast.makeText(
-                    MainActivity.this,
-                    "Failed to fetch data, watch Logcat for more details",
-                    Toast.LENGTH_SHORT)
-                .show();
-          }
-
-          @Override
-          public void onResponse(Call call, Response response) throws IOException {
-            try {
-              final JSONObject jsonObject = new JSONObject(response.body().string());
-              // setTextAsync(jsonObject.toString(3), profileTextView);
-              JSONArray playlists = jsonObject.getJSONArray("items");
-              Random rand = new Random();
-              List<Integer> chosenIndexes = new ArrayList<>();
-              for (int i = 0; i < 5; i++) {
-                int randomIndex = rand.nextInt(playlists.length());
-                while (chosenIndexes.contains(randomIndex)) {
-                  randomIndex = rand.nextInt(playlists.length());
-                }
-                chosenIndexes.add(randomIndex);
-              }
-
-              String playlistId = "";
-              int num_tracks = 0;
-              while (num_tracks == 0) {
-                int randomPlaylistIndex = chosenIndexes.get(rand.nextInt(chosenIndexes.size()));
-                JSONObject randomPlaylist = playlists.getJSONObject(randomPlaylistIndex);
-                playlistId = randomPlaylist.getString("id");
-                JSONObject tracks_dic = randomPlaylist.getJSONObject("tracks");
-                num_tracks = tracks_dic.getInt("total");
-              }
-              getTracksFromPlaylist(playlistId);
-
-            } catch (JSONException e) {
-              Log.d("JSON", "Failed to parse data: " + e);
-              Toast.makeText(
-                      MainActivity.this,
-                      "Failed to parse data, watch Logcat for more details",
-                      Toast.LENGTH_SHORT)
-                  .show();
-            }
-          }
-        });
+  public void getPlaylists() {
+    String url = "https://api.spotify.com/v1/me/playlists";
+    spotifyRequest_playlist(url);
   }
 
   /**
@@ -524,10 +703,93 @@ public class MainActivity extends AppCompatActivity {
     runOnUiThread(() -> textView.setText(text));
   }
 
-  private void getSongsAsync(final JSONObject json, TextView textView) {
+  private void display_and_save_song(final JSONObject json, TextView textView) {
+    // Update top5Songs_id
+    top5Songs_id = parseObjects(json, "id");
     ArrayList<String> text = parseObjects(json, "name");
-    String text_str = String.join(", ", text);
+    // Update top5Songs
+    top5Songs = text;
+
+    String text_str = String.join("\n", text);
     runOnUiThread(() -> textView.setText(text_str));
+  }
+
+  private void display_and_save_artist(final JSONObject json, TextView textView) {
+    // Update top5Artists_id
+    top5Artists_id = parseObjects(json, "id");
+    ArrayList<String> text = parseObjects(json, "name");
+    // Update top5Artists
+    top5Artists = text;
+
+    String text_str = String.join("\n", text);
+    runOnUiThread(() -> textView.setText(text_str));
+  }
+
+  private void display_and_save_recommendation(final JSONObject json, TextView textView) {
+    // Update recommendations
+    recommendations = parseRecommendations(json);
+
+    ArrayList<String> text = new ArrayList<>();
+    for (Map.Entry<String, String> entry : recommendations.entrySet()) {
+      text.add(entry.getKey() + " by " + entry.getValue());
+    }
+
+    String text_str = String.join("\n", text);
+
+    runOnUiThread(() -> textView.setText(text_str));
+  }
+
+  private void display_and_save_genres(final JSONObject json, TextView textView) {
+    genres = parseGenres(json);
+    int total_genres = 0;
+    for (Map.Entry<String, Integer> entry : genres.entrySet()) {
+      total_genres += entry.getValue();
+    }
+    String text_str = "Total genres: " + total_genres + "\n" + "Top 5 genres:\n";
+    // Add top 5 genres to text_str
+    int i = 0;
+    for (Map.Entry<String, Integer> entry : genres.entrySet()) {
+      text_str += entry.getKey();
+      if (i < 4) {
+        text_str += "\n";
+      } else {
+        break;
+      }
+      i++;
+    }
+
+    String finalText_str = text_str;
+    runOnUiThread(() -> textView.setText(finalText_str));
+  }
+
+  private void save_playlist(final JSONObject json, TextView textView) {
+    playlists = parsePlaylist(json);
+  }
+
+  private void save_songs_from_playlist(final JSONObject json, String playlistId) {
+    ArrayList<String> songs = new ArrayList<>();
+    try {
+      JSONArray items = (JSONArray) json.get("items");
+
+      for (int i = 0; i < items.length(); i++) {
+        // Suponiendo que top_artists es un JSONObject y 'items' es un JSONArray dentro de él
+
+        // i es tu índice en el bucle o algún valor específico
+        JSONObject item = (JSONObject) items.get(i);
+        // Now you can safely call get(key) on the JSONObject
+        JSONObject track = item.getJSONObject("track");
+        songs.add(track.getString("name")); // Use getString to directly get the String value
+      }
+
+    } catch (JSONException e) {
+      Log.d("JSON", "Failed to parse data: " + e);
+      Toast.makeText(
+              MainActivity.this,
+              "Failed to parse data, watch Logcat for more details",
+              Toast.LENGTH_SHORT)
+          .show();
+    }
+    playlist_songs.put(playlistId, songs);
   }
 
   /**
