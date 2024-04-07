@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "652803372257",
+    "project_id": "spotify-wrapped-cs2340",
+    "storage_bucket": "spotify-wrapped-cs2340.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:652803372257:android:4c28e6e56cccf1374bf3a0",
+        "android_client_info": {
+          "package_name": "com.team4.spotifywrapped"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "652803372257-aufi1n6mn55faoopeaf181idkajv9417.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.team4.spotifywrapped",
+            "certificate_hash": "b77a3e7d96c0de18e3e611b715600f80083047d9"
+          }
+        },
+        {
+          "client_id": "652803372257-hcd0tf9om2f1epcprnmr7ulfmohc8net.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.team4.spotifywrapped",
+            "certificate_hash": "13facbdb1c97b2cb63bab6684a112760d6a86f45"
+          }
+        },
+        {
+          "client_id": "652803372257-d9cioilt37l2r63omg0mmv57tef5cl6q.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA_fhstBvL2LsX-YilePUyU6AE_oCdiCgo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "652803372257-d9cioilt37l2r63omg0mmv57tef5cl6q.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

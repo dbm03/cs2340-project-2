@@ -5,7 +5,7 @@
     android:id="@+id/activity_main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".MainActivity">
+    tools:context=".MainMenu">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -24,7 +24,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_margin="8dp"
-            android:text="Request Token" />
+            android:drawableLeft="@drawable/spotify_icon"
+            android:text="Sign in with Spotify" />
 
         <TextView
             android:id="@+id/code_text_view"
@@ -58,8 +59,32 @@
                 android:layout_gravity="center_vertical"
                 android:layout_margin="8dp"
                 android:layout_weight="1"
-                android:text="Get User Profile" />
+                android:text="Get Recommendations" />
         </LinearLayout>
+
+        <Button
+            android:id="@+id/JSON_btn"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Get top 5 artists" />
+
+        <Button
+            android:id="@+id/JSON_btn2"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Get top 5 songs" />
+
+        <Button
+            android:id="@+id/genre_btn"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Get top 5 genres" />
+
+        <Button
+            android:id="@+id/game_btn"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Play game" />
     </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
