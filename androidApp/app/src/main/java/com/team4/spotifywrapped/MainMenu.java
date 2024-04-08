@@ -115,17 +115,17 @@ public class MainMenu extends AppCompatActivity {
 
     jsonBtn.setOnClickListener(
         (v) -> {
-          onGetUserMostListenArtists("long_term");
+          onGetUserMostListenArtists("medium_term");
         });
 
     jsonBtn2.setOnClickListener(
         (v) -> {
-          onGetUserMostListenSongs("long_term");
+          onGetUserMostListenSongs("medium_term");
         });
 
     genreBtn.setOnClickListener(
         (v) -> {
-          onGetUserMostListenGenres("long_term");
+          onGetUserMostListenGenres("medium_term");
         });
 
     gameBtn.setOnClickListener(
