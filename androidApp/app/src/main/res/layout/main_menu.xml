@@ -59,8 +59,32 @@
                 android:layout_gravity="center_vertical"
                 android:layout_margin="8dp"
                 android:layout_weight="1"
-                android:text="Get User Profile" />
+                android:text="Get Recommendations" />
         </LinearLayout>
+
+        <Button
+            android:id="@+id/JSON_btn"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Get top 5 artists" />
+
+        <Button
+            android:id="@+id/JSON_btn2"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Get top 5 songs" />
+
+        <Button
+            android:id="@+id/genre_btn"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Get top 5 genres" />
+
+        <Button
+            android:id="@+id/game_btn"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Play game" />
     </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
