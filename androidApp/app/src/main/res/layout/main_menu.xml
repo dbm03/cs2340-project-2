@@ -41,50 +41,30 @@
             android:layout_margin="8dp"
             android:text="Request Code" />
 
-        <TextView
-            android:id="@+id/response_text_view"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:textSize="10sp"
-            tools:text="Line 1\nLine 2\nLine 3" />
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content">
-
-            <Button
-                android:id="@+id/profile_btn"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_vertical"
-                android:layout_margin="8dp"
-                android:layout_weight="1"
-                android:text="Get Recommendations" />
-        </LinearLayout>
-
         <Button
-            android:id="@+id/JSON_btn"
+            android:id="@+id/wrapped_btn"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Get top 5 artists" />
-
-        <Button
-            android:id="@+id/JSON_btn2"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Get top 5 songs" />
-
-        <Button
-            android:id="@+id/genre_btn"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Get top 5 genres" />
+            android:text="Generate Wrapped" />
 
         <Button
             android:id="@+id/game_btn"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Play game" />
+
+        <Button
+            android:id="@+id/profile_btn"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Get Recommendations" />
+
+        <TextView
+            android:id="@+id/response_text_view"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="10sp"
+            tools:text="Line 1\nLine 2\nLine 3" />
     </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

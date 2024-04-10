@@ -2,14 +2,26 @@ package com.team4.spotifywrapped;
 
 import static java.lang.Thread.sleep;
 
+import android.app.Dialog;
+import android.content.Context;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.content.Intent;
 import android.net.Uri;
+import android.text.SpannableString;
+import android.text.SpannableStringBuilder;
+import android.text.style.RelativeSizeSpan;
 import android.util.Log;
 import android.util.Pair;
+import android.view.MenuItem;
+import android.view.View;
+import android.view.Window;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.PopupMenu;
+import android.widget.ProgressBar;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
@@ -33,6 +45,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -90,17 +103,14 @@ public class MainMenu extends AppCompatActivity {
     Button tokenBtn = (Button) findViewById(R.id.token_btn);
     Button codeBtn = (Button) findViewById(R.id.code_btn);
     Button profileBtn = (Button) findViewById(R.id.profile_btn);
-    Button jsonBtn = (Button) findViewById(R.id.JSON_btn);
-    Button jsonBtn2 = (Button) findViewById(R.id.JSON_btn2);
-    Button genreBtn = (Button) findViewById(R.id.genre_btn);
     Button gameBtn = (Button) findViewById(R.id.game_btn);
+    Button wrappedBtn = (Button) findViewById(R.id.wrapped_btn);
 
     // Set the click listeners for the buttons
 
     tokenBtn.setOnClickListener(
         (v) -> {
           getToken();
-          System.out.println(top5Songs);
         });
 
     codeBtn.setOnClickListener(
@@ -113,28 +123,21 @@ public class MainMenu extends AppCompatActivity {
           getRecommendations();
         });
 
-    jsonBtn.setOnClickListener(
-        (v) -> {
-          onGetUserMostListenArtists("medium_term");
-        });
-
-    jsonBtn2.setOnClickListener(
-        (v) -> {
-          onGetUserMostListenSongs("medium_term");
-        });
-
-    genreBtn.setOnClickListener(
-        (v) -> {
-          onGetUserMostListenGenres("medium_term");
-        });
-
     gameBtn.setOnClickListener(
         (v) -> {
           try {
+            Toast.makeText(this, "Playing game, this may take a while", Toast.LENGTH_SHORT).show();
             play_game();
           } catch (InterruptedException e) {
             e.printStackTrace();
           }
+        });
+
+    wrappedBtn.setOnClickListener(new View.OnClickListener() {
+      @Override
+      public void onClick(View v) {
+        showPopupMenu(v);
+      }
         });
   }
 
@@ -148,6 +151,113 @@ public class MainMenu extends AppCompatActivity {
           "MainMenuStart",
           "currentUser:" + currentUser.getDisplayName() + " email:" + currentUser.getEmail());
       // User already signed in
+    }
+  }
+
+  private void generateWrapped(TextView textView, String timeFrame) {
+    System.out.println("Generating Wrapped");
+    onGetUserMostListenArtists(timeFrame);
+    try {
+        sleep(1000);
+        } catch (InterruptedException e) {
+        e.printStackTrace();
+    }
+    System.out.println("Artists done");
+    onGetUserMostListenSongs(timeFrame);
+    try {
+        sleep(1000);
+        } catch (InterruptedException e) {
+        e.printStackTrace();
+    }
+    System.out.println("Songs done");
+    onGetUserMostListenGenres(timeFrame);
+    try {
+        sleep(1000);
+        } catch (InterruptedException e) {
+        e.printStackTrace();
+    }
+    System.out.println("Genres done");
+
+    String top5SongsStr = String.join("\n", top5Songs);
+    String top5ArtistsStr = String.join("\n", top5Artists);
+    int total_genres = genres.keySet().size();
+
+    // Sort the genres by the number of times they appear
+    genres = genres.entrySet().stream()
+        .sorted(Map.Entry.comparingByValue(Comparator.reverseOrder()))
+        .collect(
+            Collectors.toMap(
+                Map.Entry::getKey,
+                Map.Entry::getValue,
+                (e1, e2) -> e1,
+                LinkedHashMap::new));
+
+    // Get the top 5 genres
+    int i = 0;
+    String top5GenresStr = "";
+    for (Map.Entry<String, Integer> entry : genres.entrySet()) {
+      top5GenresStr += entry.getKey();
+      if (i < 4) {
+        top5GenresStr += "\n";
+      } else {
+        break;
+      }
+      i++;
+    }
+
+    String finalText_str = "Top 5 Songs: " + top5SongsStr + "\nTop 5 Artists: " + top5ArtistsStr + "\nTotal Genres: " + total_genres + "\nTop 5 Genres: " + top5GenresStr;
+
+    //runOnUiThread(() -> textView.setText(finalText_str));
+    //Start the wrapped activity
+    Intent intent = new Intent(MainMenu.this, WrappedScreen.class);
+    //put the final text string in the intent
+    intent.putExtra("top5Songs", top5SongsStr);
+    intent.putExtra("top5Artists", top5ArtistsStr);
+    intent.putExtra("totalGenres", (String.valueOf(total_genres)));
+    intent.putExtra("top5Genres", top5GenresStr);
+
+    startActivity(intent);
+  }
+
+  private void showPopupMenu(View v) {
+    PopupMenu popupMenu = new PopupMenu(this, v);
+    popupMenu.getMenuInflater().inflate(R.menu.popup_menu, popupMenu.getMenu());
+
+    popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+      @Override
+      public boolean onMenuItemClick(MenuItem item) {
+        executeMethodBasedOnOption(item.getTitle().toString());
+        return true;
+      }
+    });
+
+    popupMenu.show();
+  }
+
+  private void executeMethodBasedOnOption(String option) {
+    LoadingDialog loadingDialog = new LoadingDialog(this);
+    switch (option) {
+      case "Short":
+        Toast.makeText(this, "Short term selected, this may take a while", Toast.LENGTH_SHORT).show();
+        loadingDialog.showDialog("Generating Wrapped...");
+        generateWrapped(profileTextView, "short_term");
+        loadingDialog.hideDialog();
+        break;
+      case "Medium":
+        Toast.makeText(this, "Medium term selected, this may take a while", Toast.LENGTH_SHORT).show();
+        loadingDialog.showDialog("Generating Wrapped...");
+        generateWrapped(profileTextView, "medium_term");
+        loadingDialog.hideDialog();
+        break;
+      case "Long":
+        Toast.makeText(this, "Long term selected, this may take a while", Toast.LENGTH_SHORT).show();
+        loadingDialog.showDialog("Generating Wrapped...");
+        generateWrapped(profileTextView, "long_term");
+        loadingDialog.hideDialog();
+        break;
+      default:
+        // Handle default case if needed
+        break;
     }
   }
 
@@ -227,11 +337,11 @@ public class MainMenu extends AppCompatActivity {
     // Check which request code is present (if any)
     if (AUTH_TOKEN_REQUEST_CODE == requestCode) {
       mAccessToken = response.getAccessToken();
-      setTextAsync(mAccessToken, tokenTextView);
+      setTextAsync("You succesfully logged in!", tokenTextView);
 
     } else if (AUTH_CODE_REQUEST_CODE == requestCode) {
       mAccessCode = response.getCode();
-      setTextAsync(mAccessCode, codeTextView);
+      setTextAsync("You succesfully retieved the token!", codeTextView);
     }
   }
 
@@ -791,8 +901,8 @@ public class MainMenu extends AppCompatActivity {
     // Update top5Songs
     top5Songs = text;
 
-    String text_str = String.join("\n", text);
-    runOnUiThread(() -> textView.setText(text_str));
+    /*String text_str = String.join("\n", text);
+    runOnUiThread(() -> textView.setText(text_str));*/
   }
 
   private void display_and_save_artist(final JSONObject json, TextView textView) {
@@ -802,27 +912,40 @@ public class MainMenu extends AppCompatActivity {
     // Update top5Artists
     top5Artists = text;
 
-    String text_str = String.join("\n", text);
-    runOnUiThread(() -> textView.setText(text_str));
+    /*String text_str = String.join("\n", text);
+    runOnUiThread(() -> textView.setText(text_str));*/
   }
 
   private void display_and_save_recommendation(final JSONObject json, TextView textView) {
     // Update recommendations
     recommendations = parseRecommendations(json);
 
+    SpannableStringBuilder builder = new SpannableStringBuilder();
+
+    //We believe these 5 songs are of your liking
+    SpannableString boldText = new SpannableString("We believe these 5 songs are of your liking\n\n");
+    // make "We believe these 5 songs are of your liking"bigger
+    boldText.setSpan(new RelativeSizeSpan(2f), 0, boldText.length(), 0);
+    builder.append(boldText);
+
     ArrayList<String> text = new ArrayList<>();
     for (Map.Entry<String, String> entry : recommendations.entrySet()) {
-      text.add(entry.getKey() + " by " + entry.getValue());
+      text.add("· "+entry.getKey() + " by " + entry.getValue() + "\n");
     }
 
-    String text_str = String.join("\n", text);
+    for (String s : text) {
+      SpannableString str = new SpannableString(s + "\n");
+      //make it a bit bigger
+        str.setSpan(new RelativeSizeSpan(1.5f), 0, str.length(), 0);
+      builder.append(str);
+    }
 
-    runOnUiThread(() -> textView.setText(text_str));
+    runOnUiThread(() -> textView.setText(builder));
   }
 
   private void display_and_save_genres(final JSONObject json, TextView textView) {
     genres = parseGenres(json);
-    int total_genres = 0;
+    /*int total_genres = 0;
     for (Map.Entry<String, Integer> entry : genres.entrySet()) {
       total_genres += entry.getValue();
     }
@@ -840,7 +963,7 @@ public class MainMenu extends AppCompatActivity {
     }
 
     String finalText_str = text_str;
-    runOnUiThread(() -> textView.setText(finalText_str));
+    runOnUiThread(() -> textView.setText(finalText_str));*/
   }
 
   private void save_playlist(final JSONObject json, TextView textView) {
