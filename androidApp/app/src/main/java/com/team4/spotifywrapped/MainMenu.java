@@ -96,15 +96,16 @@ public class MainMenu extends AppCompatActivity {
 
     // Initialize the views
     tokenTextView = (TextView) findViewById(R.id.token_text_view);
-    codeTextView = (TextView) findViewById(R.id.code_text_view);
+    //codeTextView = (TextView) findViewById(R.id.code_text_view);
     profileTextView = (TextView) findViewById(R.id.response_text_view);
 
     // Initialize the buttons
     Button tokenBtn = (Button) findViewById(R.id.token_btn);
-    Button codeBtn = (Button) findViewById(R.id.code_btn);
+    //Button codeBtn = (Button) findViewById(R.id.code_btn);
     Button profileBtn = (Button) findViewById(R.id.profile_btn);
     Button gameBtn = (Button) findViewById(R.id.game_btn);
     Button wrappedBtn = (Button) findViewById(R.id.wrapped_btn);
+    Button recommendationsBtn = (Button) findViewById(R.id.artist_recom_btn);
 
     // Set the click listeners for the buttons
 
@@ -113,10 +114,10 @@ public class MainMenu extends AppCompatActivity {
           getToken();
         });
 
-    codeBtn.setOnClickListener(
+    /*codeBtn.setOnClickListener(
         (v) -> {
           getCode();
-        });
+        });*/
 
     profileBtn.setOnClickListener(
         (v) -> {
@@ -131,6 +132,11 @@ public class MainMenu extends AppCompatActivity {
           } catch (InterruptedException e) {
             e.printStackTrace();
           }
+        });
+
+    recommendationsBtn.setOnClickListener(
+        (v) -> {
+          getArtistRecommendations();
         });
 
     wrappedBtn.setOnClickListener(new View.OnClickListener() {
@@ -337,6 +343,7 @@ public class MainMenu extends AppCompatActivity {
     // Check which request code is present (if any)
     if (AUTH_TOKEN_REQUEST_CODE == requestCode) {
       mAccessToken = response.getAccessToken();
+      System.out.println("Access token: " + mAccessToken);
       setTextAsync("You succesfully logged in!", tokenTextView);
 
     } else if (AUTH_CODE_REQUEST_CODE == requestCode) {
@@ -371,6 +378,31 @@ public class MainMenu extends AppCompatActivity {
     return hash_vals;
   }
 
+  public ArrayList<String> parseArtistRecommendations(JSONObject json_value) {
+    ArrayList<String> hash_vals = new ArrayList<>();
+    try {
+      JSONArray items = (JSONArray) json_value.get("artists");
+
+      for (int i = 0; i < items.length(); i++) {
+        // Suponiendo que top_artists es un JSONObject y 'items' es un JSONArray dentro de él
+
+        // i es tu índice en el bucle o algún valor específico
+        JSONObject item = (JSONObject) items.get(i);
+        // Now you can safely call get(key) on the JSONObject
+        hash_vals.add(item.getString("name")); // Use getString to directly get the String value
+      }
+
+    } catch (JSONException e) {
+      Log.d("JSON", "Failed to parse data: " + e);
+      Toast.makeText(
+                      MainMenu.this,
+                      "Failed to parse data, watch Logcat for more details",
+                      Toast.LENGTH_SHORT)
+              .show();
+    }
+
+    return hash_vals;
+  }
   public Map<String, String> parseRecommendations(JSONObject json_value) {
     Map<String, String> hash_vals = new HashMap<>();
     try {
@@ -658,6 +690,50 @@ public class MainMenu extends AppCompatActivity {
         });
   }
 
+  public void spotifyRequest_artist_recommendation(String url_parameter) {
+    if (mAccessToken == null) {
+      Toast.makeText(this, "You need to get an access token first!", Toast.LENGTH_SHORT).show();
+    }
+
+    // Create a request to get the user profile
+    final Request request =
+            new Request.Builder()
+                    .url(url_parameter)
+                    .addHeader("Authorization", "Bearer " + mAccessToken)
+                    .build();
+
+    cancelCall();
+    mCall = mOkHttpClient.newCall(request);
+
+    mCall.enqueue(
+            new Callback() {
+              @Override
+              public void onFailure(Call call, IOException e) {
+                Log.d("HTTP", "Failed to fetch data: " + e);
+                Toast.makeText(
+                                MainMenu.this,
+                                "Failed to fetch data, watch Logcat for more details",
+                                Toast.LENGTH_SHORT)
+                        .show();
+              }
+
+              @Override
+              public void onResponse(Call call, Response response) throws IOException {
+                try {
+                  final JSONObject jsonObject = new JSONObject(response.body().string());
+                  display_and_save_artist_recommendation(jsonObject, profileTextView);
+                } catch (JSONException e) {
+                  Log.d("JSON", "Failed to parse data: " + e);
+                  Toast.makeText(
+                                  MainMenu.this,
+                                  "Failed to parse data, watch Logcat for more details",
+                                  Toast.LENGTH_SHORT)
+                          .show();
+                }
+              }
+            });
+  }
+
   public void spotifyRequest_genres(String url_parameter) {
     if (mAccessToken == null) {
       Toast.makeText(this, "You need to get an access token first!", Toast.LENGTH_SHORT).show();
@@ -778,6 +854,17 @@ public class MainMenu extends AppCompatActivity {
     String song_ids = String.join("%2C", top5Songs_id);
     String url = "https://api.spotify.com/v1/recommendations?&limit=5&seed_tracks=" + song_ids;
     spotifyRequest_recommendation(url);
+  }
+
+  public void getArtistRecommendations() {
+    if (top5Artists_id.isEmpty()) {
+      Toast.makeText(this, "You need to get your top 5 artists first!", Toast.LENGTH_SHORT).show();
+      return;
+    }
+    //Take the first artist id
+    String artist_id = top5Artists_id.get(0);
+    String url = "https://api.spotify.com/v1/artists/" + artist_id + "/related-artists";
+    spotifyRequest_artist_recommendation(url);
   }
 
   private void spotifyRequest_playlist_songs(String playlistId) {
@@ -938,6 +1025,34 @@ public class MainMenu extends AppCompatActivity {
       //make it a bit bigger
         str.setSpan(new RelativeSizeSpan(1.5f), 0, str.length(), 0);
       builder.append(str);
+    }
+
+    runOnUiThread(() -> textView.setText(builder));
+  }
+
+  private void display_and_save_artist_recommendation(final JSONObject json, TextView textView) {
+    // Update recommendations
+    ArrayList<String> text = parseArtistRecommendations(json);
+
+    SpannableStringBuilder builder = new SpannableStringBuilder();
+
+    //We believe these 5 songs are of your liking
+    SpannableString boldText = new SpannableString("We believe these 5 artists are of your liking\n\n");
+    // make "We believe these 5 songs are of your liking"bigger
+    boldText.setSpan(new RelativeSizeSpan(2f), 0, boldText.length(), 0);
+    builder.append(boldText);
+
+    //Get the first 5 artists
+    int i = 0;
+    for (String s : text) {
+        if (i >= 5) {
+            break;
+        }
+      SpannableString str = new SpannableString("· "+s + "\n");
+      //make it a bit bigger
+      str.setSpan(new RelativeSizeSpan(1.5f), 0, str.length(), 0);
+      builder.append(str);
+      i++;
     }
 
     runOnUiThread(() -> textView.setText(builder));

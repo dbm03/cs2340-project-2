@@ -27,20 +27,6 @@
             android:drawableLeft="@drawable/spotify_icon"
             android:text="Sign in with Spotify" />
 
-        <TextView
-            android:id="@+id/code_text_view"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_margin="8dp"
-            tools:text="Code:" />
-
-        <Button
-            android:id="@+id/code_btn"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_margin="8dp"
-            android:text="Request Code" />
-
         <Button
             android:id="@+id/wrapped_btn"
             android:layout_width="match_parent"
@@ -57,7 +43,13 @@
             android:id="@+id/profile_btn"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Get Recommendations" />
+            android:text="Get Song Recommendations" />
+
+        <Button
+            android:id="@+id/artist_recom_btn"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Get Artist Recommendations" />
 
         <TextView
             android:id="@+id/response_text_view"
