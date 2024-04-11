@@ -94,6 +94,8 @@ public class MainMenu extends AppCompatActivity {
     Button jsonBtn2 = (Button) findViewById(R.id.JSON_btn2);
     Button genreBtn = (Button) findViewById(R.id.genre_btn);
     Button gameBtn = (Button) findViewById(R.id.game_btn);
+    Button modifyBtn = (Button) findViewById(R.id.modify_btn);
+    Button logOutBtn = (Button) findViewById(R.id.logout_btn);
 
     // Set the click listeners for the buttons
 
@@ -135,6 +137,19 @@ public class MainMenu extends AppCompatActivity {
           } catch (InterruptedException e) {
             e.printStackTrace();
           }
+        });
+
+    modifyBtn.setOnClickListener(
+        (v) -> {
+          Intent intent = new Intent(MainMenu.this, ModifyUser.class);
+          startActivity(intent);
+        });
+
+    logOutBtn.setOnClickListener(
+        (v) -> {
+          mAuth.signOut();
+          Intent intent = new Intent(MainMenu.this, StartupScreen.class);
+          startActivity(intent);
         });
   }
 
