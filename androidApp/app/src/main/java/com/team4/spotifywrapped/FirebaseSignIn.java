@@ -78,7 +78,7 @@ public class FirebaseSignIn extends AppCompatActivity {
                   AuthUI.getInstance()
                       .createSignInIntentBuilder()
                       .setAvailableProviders(providers)
-                      .setTheme(R.style.Theme_SpotifyWrapped)
+                      .setTheme(R.style.SpotifyWrappedTheme)
                       .setLogo(R.drawable.logo)
                       .build();
               signInLauncher.launch(signInIntent);
