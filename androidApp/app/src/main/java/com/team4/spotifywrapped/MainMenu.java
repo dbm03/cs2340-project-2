@@ -2,10 +2,6 @@ package com.team4.spotifywrapped;
 
 import static java.lang.Thread.sleep;
 
-import android.app.Dialog;
-import android.content.Context;
-import android.graphics.Color;
-import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.content.Intent;
 import android.net.Uri;
@@ -16,12 +12,10 @@ import android.util.Log;
 import android.util.Pair;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.Window;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.PopupMenu;
-import android.widget.ProgressBar;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
@@ -96,12 +90,12 @@ public class MainMenu extends AppCompatActivity {
 
     // Initialize the views
     tokenTextView = (TextView) findViewById(R.id.token_text_view);
-    //codeTextView = (TextView) findViewById(R.id.code_text_view);
+    // codeTextView = (TextView) findViewById(R.id.code_text_view);
     profileTextView = (TextView) findViewById(R.id.response_text_view);
 
     // Initialize the buttons
     Button tokenBtn = (Button) findViewById(R.id.token_btn);
-    //Button codeBtn = (Button) findViewById(R.id.code_btn);
+    // Button codeBtn = (Button) findViewById(R.id.code_btn);
     Button profileBtn = (Button) findViewById(R.id.profile_btn);
     Button gameBtn = (Button) findViewById(R.id.game_btn);
     Button wrappedBtn = (Button) findViewById(R.id.wrapped_btn);
@@ -115,9 +109,9 @@ public class MainMenu extends AppCompatActivity {
         });
 
     /*codeBtn.setOnClickListener(
-        (v) -> {
-          getCode();
-        });*/
+    (v) -> {
+      getCode();
+    });*/
 
     profileBtn.setOnClickListener(
         (v) -> {
@@ -139,11 +133,12 @@ public class MainMenu extends AppCompatActivity {
           getArtistRecommendations();
         });
 
-    wrappedBtn.setOnClickListener(new View.OnClickListener() {
-      @Override
-      public void onClick(View v) {
-        showPopupMenu(v);
-      }
+    wrappedBtn.setOnClickListener(
+        new View.OnClickListener() {
+          @Override
+          public void onClick(View v) {
+            showPopupMenu(v);
+          }
         });
   }
 
@@ -164,23 +159,23 @@ public class MainMenu extends AppCompatActivity {
     System.out.println("Generating Wrapped");
     onGetUserMostListenArtists(timeFrame);
     try {
-        sleep(1000);
-        } catch (InterruptedException e) {
-        e.printStackTrace();
+      sleep(1000);
+    } catch (InterruptedException e) {
+      e.printStackTrace();
     }
     System.out.println("Artists done");
     onGetUserMostListenSongs(timeFrame);
     try {
-        sleep(1000);
-        } catch (InterruptedException e) {
-        e.printStackTrace();
+      sleep(1000);
+    } catch (InterruptedException e) {
+      e.printStackTrace();
     }
     System.out.println("Songs done");
     onGetUserMostListenGenres(timeFrame);
     try {
-        sleep(1000);
-        } catch (InterruptedException e) {
-        e.printStackTrace();
+      sleep(1000);
+    } catch (InterruptedException e) {
+      e.printStackTrace();
     }
     System.out.println("Genres done");
 
@@ -189,14 +184,12 @@ public class MainMenu extends AppCompatActivity {
     int total_genres = genres.keySet().size();
 
     // Sort the genres by the number of times they appear
-    genres = genres.entrySet().stream()
-        .sorted(Map.Entry.comparingByValue(Comparator.reverseOrder()))
-        .collect(
-            Collectors.toMap(
-                Map.Entry::getKey,
-                Map.Entry::getValue,
-                (e1, e2) -> e1,
-                LinkedHashMap::new));
+    genres =
+        genres.entrySet().stream()
+            .sorted(Map.Entry.comparingByValue(Comparator.reverseOrder()))
+            .collect(
+                Collectors.toMap(
+                    Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
 
     // Get the top 5 genres
     int i = 0;
@@ -211,12 +204,20 @@ public class MainMenu extends AppCompatActivity {
       i++;
     }
 
-    String finalText_str = "Top 5 Songs: " + top5SongsStr + "\nTop 5 Artists: " + top5ArtistsStr + "\nTotal Genres: " + total_genres + "\nTop 5 Genres: " + top5GenresStr;
+    String finalText_str =
+        "Top 5 Songs: "
+            + top5SongsStr
+            + "\nTop 5 Artists: "
+            + top5ArtistsStr
+            + "\nTotal Genres: "
+            + total_genres
+            + "\nTop 5 Genres: "
+            + top5GenresStr;
 
-    //runOnUiThread(() -> textView.setText(finalText_str));
-    //Start the wrapped activity
+    // runOnUiThread(() -> textView.setText(finalText_str));
+    // Start the wrapped activity
     Intent intent = new Intent(MainMenu.this, WrappedScreen.class);
-    //put the final text string in the intent
+    // put the final text string in the intent
     intent.putExtra("top5Songs", top5SongsStr);
     intent.putExtra("top5Artists", top5ArtistsStr);
     intent.putExtra("totalGenres", (String.valueOf(total_genres)));
@@ -229,13 +230,14 @@ public class MainMenu extends AppCompatActivity {
     PopupMenu popupMenu = new PopupMenu(this, v);
     popupMenu.getMenuInflater().inflate(R.menu.popup_menu, popupMenu.getMenu());
 
-    popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
-      @Override
-      public boolean onMenuItemClick(MenuItem item) {
-        executeMethodBasedOnOption(item.getTitle().toString());
-        return true;
-      }
-    });
+    popupMenu.setOnMenuItemClickListener(
+        new PopupMenu.OnMenuItemClickListener() {
+          @Override
+          public boolean onMenuItemClick(MenuItem item) {
+            executeMethodBasedOnOption(item.getTitle().toString());
+            return true;
+          }
+        });
 
     popupMenu.show();
   }
@@ -244,19 +246,22 @@ public class MainMenu extends AppCompatActivity {
     LoadingDialog loadingDialog = new LoadingDialog(this);
     switch (option) {
       case "Short":
-        Toast.makeText(this, "Short term selected, this may take a while", Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, "Short term selected, this may take a while", Toast.LENGTH_SHORT)
+            .show();
         loadingDialog.showDialog("Generating Wrapped...");
         generateWrapped(profileTextView, "short_term");
         loadingDialog.hideDialog();
         break;
       case "Medium":
-        Toast.makeText(this, "Medium term selected, this may take a while", Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, "Medium term selected, this may take a while", Toast.LENGTH_SHORT)
+            .show();
         loadingDialog.showDialog("Generating Wrapped...");
         generateWrapped(profileTextView, "medium_term");
         loadingDialog.hideDialog();
         break;
       case "Long":
-        Toast.makeText(this, "Long term selected, this may take a while", Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, "Long term selected, this may take a while", Toast.LENGTH_SHORT)
+            .show();
         loadingDialog.showDialog("Generating Wrapped...");
         generateWrapped(profileTextView, "long_term");
         loadingDialog.hideDialog();
@@ -395,14 +400,15 @@ public class MainMenu extends AppCompatActivity {
     } catch (JSONException e) {
       Log.d("JSON", "Failed to parse data: " + e);
       Toast.makeText(
-                      MainMenu.this,
-                      "Failed to parse data, watch Logcat for more details",
-                      Toast.LENGTH_SHORT)
-              .show();
+              MainMenu.this,
+              "Failed to parse data, watch Logcat for more details",
+              Toast.LENGTH_SHORT)
+          .show();
     }
 
     return hash_vals;
   }
+
   public Map<String, String> parseRecommendations(JSONObject json_value) {
     Map<String, String> hash_vals = new HashMap<>();
     try {
@@ -697,41 +703,41 @@ public class MainMenu extends AppCompatActivity {
 
     // Create a request to get the user profile
     final Request request =
-            new Request.Builder()
-                    .url(url_parameter)
-                    .addHeader("Authorization", "Bearer " + mAccessToken)
-                    .build();
+        new Request.Builder()
+            .url(url_parameter)
+            .addHeader("Authorization", "Bearer " + mAccessToken)
+            .build();
 
     cancelCall();
     mCall = mOkHttpClient.newCall(request);
 
     mCall.enqueue(
-            new Callback() {
-              @Override
-              public void onFailure(Call call, IOException e) {
-                Log.d("HTTP", "Failed to fetch data: " + e);
-                Toast.makeText(
-                                MainMenu.this,
-                                "Failed to fetch data, watch Logcat for more details",
-                                Toast.LENGTH_SHORT)
-                        .show();
-              }
+        new Callback() {
+          @Override
+          public void onFailure(Call call, IOException e) {
+            Log.d("HTTP", "Failed to fetch data: " + e);
+            Toast.makeText(
+                    MainMenu.this,
+                    "Failed to fetch data, watch Logcat for more details",
+                    Toast.LENGTH_SHORT)
+                .show();
+          }
 
-              @Override
-              public void onResponse(Call call, Response response) throws IOException {
-                try {
-                  final JSONObject jsonObject = new JSONObject(response.body().string());
-                  display_and_save_artist_recommendation(jsonObject, profileTextView);
-                } catch (JSONException e) {
-                  Log.d("JSON", "Failed to parse data: " + e);
-                  Toast.makeText(
-                                  MainMenu.this,
-                                  "Failed to parse data, watch Logcat for more details",
-                                  Toast.LENGTH_SHORT)
-                          .show();
-                }
-              }
-            });
+          @Override
+          public void onResponse(Call call, Response response) throws IOException {
+            try {
+              final JSONObject jsonObject = new JSONObject(response.body().string());
+              display_and_save_artist_recommendation(jsonObject, profileTextView);
+            } catch (JSONException e) {
+              Log.d("JSON", "Failed to parse data: " + e);
+              Toast.makeText(
+                      MainMenu.this,
+                      "Failed to parse data, watch Logcat for more details",
+                      Toast.LENGTH_SHORT)
+                  .show();
+            }
+          }
+        });
   }
 
   public void spotifyRequest_genres(String url_parameter) {
@@ -861,7 +867,7 @@ public class MainMenu extends AppCompatActivity {
       Toast.makeText(this, "You need to get your top 5 artists first!", Toast.LENGTH_SHORT).show();
       return;
     }
-    //Take the first artist id
+    // Take the first artist id
     String artist_id = top5Artists_id.get(0);
     String url = "https://api.spotify.com/v1/artists/" + artist_id + "/related-artists";
     spotifyRequest_artist_recommendation(url);
@@ -1009,21 +1015,22 @@ public class MainMenu extends AppCompatActivity {
 
     SpannableStringBuilder builder = new SpannableStringBuilder();
 
-    //We believe these 5 songs are of your liking
-    SpannableString boldText = new SpannableString("We believe these 5 songs are of your liking\n\n");
+    // We believe these 5 songs are of your liking
+    SpannableString boldText =
+        new SpannableString("We believe these 5 songs are of your liking\n\n");
     // make "We believe these 5 songs are of your liking"bigger
     boldText.setSpan(new RelativeSizeSpan(2f), 0, boldText.length(), 0);
     builder.append(boldText);
 
     ArrayList<String> text = new ArrayList<>();
     for (Map.Entry<String, String> entry : recommendations.entrySet()) {
-      text.add("· "+entry.getKey() + " by " + entry.getValue() + "\n");
+      text.add("· " + entry.getKey() + " by " + entry.getValue() + "\n");
     }
 
     for (String s : text) {
       SpannableString str = new SpannableString(s + "\n");
-      //make it a bit bigger
-        str.setSpan(new RelativeSizeSpan(1.5f), 0, str.length(), 0);
+      // make it a bit bigger
+      str.setSpan(new RelativeSizeSpan(1.5f), 0, str.length(), 0);
       builder.append(str);
     }
 
@@ -1036,20 +1043,21 @@ public class MainMenu extends AppCompatActivity {
 
     SpannableStringBuilder builder = new SpannableStringBuilder();
 
-    //We believe these 5 songs are of your liking
-    SpannableString boldText = new SpannableString("We believe these 5 artists are of your liking\n\n");
+    // We believe these 5 songs are of your liking
+    SpannableString boldText =
+        new SpannableString("We believe these 5 artists are of your liking\n\n");
     // make "We believe these 5 songs are of your liking"bigger
     boldText.setSpan(new RelativeSizeSpan(2f), 0, boldText.length(), 0);
     builder.append(boldText);
 
-    //Get the first 5 artists
+    // Get the first 5 artists
     int i = 0;
     for (String s : text) {
-        if (i >= 5) {
-            break;
-        }
-      SpannableString str = new SpannableString("· "+s + "\n");
-      //make it a bit bigger
+      if (i >= 5) {
+        break;
+      }
+      SpannableString str = new SpannableString("· " + s + "\n");
+      // make it a bit bigger
       str.setSpan(new RelativeSizeSpan(1.5f), 0, str.length(), 0);
       builder.append(str);
       i++;
