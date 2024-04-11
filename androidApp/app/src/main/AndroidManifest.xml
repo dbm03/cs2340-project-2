@@ -63,7 +63,7 @@
         <activity
             android:name=".WrappedScreen"
             android:exported="true"
-            android:theme="@style/Theme.SpotifyWrapped">
+            android:theme="@style/SpotifyWrappedTheme">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
