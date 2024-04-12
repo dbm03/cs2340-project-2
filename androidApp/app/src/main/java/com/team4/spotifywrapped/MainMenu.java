@@ -110,6 +110,8 @@ public class MainMenu extends AppCompatActivity {
     Button wrappedBtn = (Button) findViewById(R.id.wrapped_btn);
     Button recommendationsBtn = (Button) findViewById(R.id.artist_recom_btn);
     previousWrappedBtn = (Button) findViewById(R.id.previous_wrapped_btn);
+    Button modifyBtn = (Button) findViewById(R.id.modify_btn);
+    Button logOutBtn = (Button) findViewById(R.id.logout_btn);
 
     // Set the click listeners for the buttons
 
@@ -154,6 +156,19 @@ public class MainMenu extends AppCompatActivity {
     previousWrappedBtn.setOnClickListener(
         (v) -> {
           getPreviousWrappeds();
+        });
+
+    modifyBtn.setOnClickListener(
+        (v) -> {
+          Intent intent = new Intent(MainMenu.this, ModifyUser.class);
+          startActivity(intent);
+        });
+
+    logOutBtn.setOnClickListener(
+        (v) -> {
+          mAuth.signOut();
+          Intent intent = new Intent(MainMenu.this, StartupScreen.class);
+          startActivity(intent);
         });
   }
 

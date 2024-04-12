@@ -87,6 +87,20 @@
                     android:scheme="spotifysdk" />
             </intent-filter>
         </activity>
+        <activity
+            android:name=".ModifyUser"
+            android:exported="true"
+            android:label="@string/app_name"
+            android:theme="@style/SpotifyWrappedTheme">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <!-- Adjust these to match your Redirect URI -->
+                <data android:scheme="spotifysdk"
+                    android:host="auth" />
+            </intent-filter>
+        </activity>
     </application>
 
 </manifest>

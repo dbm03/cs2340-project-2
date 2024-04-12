@@ -63,6 +63,18 @@
             android:layout_height="wrap_content"
             android:textSize="10sp"
             tools:text="Line 1\nLine 2\nLine 3" />
+
+        <Button
+            android:id="@+id/modify_btn"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Edit account" />
+
+        <Button
+            android:id="@+id/logout_btn"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Log out" />
     </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
