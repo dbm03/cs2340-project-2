@@ -37,7 +37,13 @@
             android:id="@+id/game_btn"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Play game" />
+            android:text="Where is this song from?" />
+
+        <Button
+            android:id="@+id/game2_btn"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Complete the song name" />
 
         <Button
             android:id="@+id/profile_btn"

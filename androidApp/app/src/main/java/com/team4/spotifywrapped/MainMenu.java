@@ -112,6 +112,7 @@ public class MainMenu extends AppCompatActivity {
     previousWrappedBtn = (Button) findViewById(R.id.previous_wrapped_btn);
     Button modifyBtn = (Button) findViewById(R.id.modify_btn);
     Button logOutBtn = (Button) findViewById(R.id.logout_btn);
+    Button game2Btn = (Button) findViewById(R.id.game2_btn);
 
     // Set the click listeners for the buttons
 
@@ -170,6 +171,11 @@ public class MainMenu extends AppCompatActivity {
           Intent intent = new Intent(MainMenu.this, StartupScreen.class);
           startActivity(intent);
         });
+
+    game2Btn.setOnClickListener(
+        (v) -> {
+          playgame2();
+        });
   }
 
   @Override
@@ -183,6 +189,27 @@ public class MainMenu extends AppCompatActivity {
           "currentUser:" + currentUser.getDisplayName() + " email:" + currentUser.getEmail());
       // User already signed in
     }
+  }
+
+  private void playgame2() {
+    // Select a random song from the top 5 songs and strip 4 random characters from the song name
+    // The user has to guess the song name
+    if (top5Songs.size() == 0) {
+      Toast.makeText(this, "You need to generate a wrapped first!", Toast.LENGTH_SHORT).show();
+      return;
+    }
+    int randomIndex = (int) (Math.random() * top5Songs.size());
+    String song = top5Songs.get(randomIndex);
+    String song_name = song;
+    for (int i = 0; i < 4; i++) {
+      int randomChar = (int) (Math.random() * song_name.length());
+      song_name = song_name.substring(0, randomChar) + "_" + song_name.substring(randomChar + 1);
+    }
+    // Display the song name with 4 characters stripped in the profileTextView
+    setTextAsync("Guess the song: " + song_name, profileTextView);
+
+    // TODO: Implement a way to check if the user guessed the song correctly
+    // TODO: Add interface to allow the user to input their guess
   }
 
   private void getPreviousWrappeds() {

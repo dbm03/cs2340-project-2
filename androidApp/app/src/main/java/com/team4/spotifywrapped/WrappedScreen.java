@@ -20,9 +20,21 @@ public class WrappedScreen extends AppCompatActivity {
     String top5Genres = getIntent().getStringExtra("top5Genres");
     String totalGenres = getIntent().getStringExtra("totalGenres");
 
-    TextView textView = findViewById(R.id.textView);
+    TextView wrappedTitle = findViewById(R.id.wrappedTitle);
+    TextView wrappedSubtitle = findViewById(R.id.wrappedSubtitle);
+    TextView wrappedSongs = findViewById(R.id.wrappedSongs);
+    TextView wrappedSubtitle2 = findViewById(R.id.wrappedSubtitle2);
+    TextView wrappedArtists = findViewById(R.id.wrappedArtists);
+    TextView wrappedSubtitle3 = findViewById(R.id.wrappedSubtitle3);
+    TextView wrappedNumber = findViewById(R.id.wrappedNumber);
+    TextView wrappedSubtitle4 = findViewById(R.id.wrappedSubtitle4);
+    TextView wrappedGenres = findViewById(R.id.wrappedGenres);
 
-    SpannableStringBuilder builder = new SpannableStringBuilder();
+    SpannableStringBuilder buildTitle = new SpannableStringBuilder();
+    SpannableStringBuilder buildSubtitle = new SpannableStringBuilder();
+    SpannableStringBuilder buildSongs = new SpannableStringBuilder();
+    SpannableStringBuilder buildArtists = new SpannableStringBuilder();
+    SpannableStringBuilder buildGenres = new SpannableStringBuilder();
 
     // Bold and big for title These are your top 5 songs, artists, and genres from Spotify!
     SpannableString boldSpan =
@@ -61,68 +73,72 @@ public class WrappedScreen extends AppCompatActivity {
         boldSpan.toString().indexOf("genres") + "genres".length(),
         0);
 
-    builder.append(boldSpan);
+    buildTitle.append(boldSpan);
 
     // Subtitle Top 5 Songs:
-    SpannableString subtitle = new SpannableString("Top 5 Songs:\n");
+    SpannableString subtitle = new SpannableString("Top 5 Songs\n");
     subtitle.setSpan(
         new android.text.style.StyleSpan(android.graphics.Typeface.BOLD), 0, subtitle.length(), 0);
     subtitle.setSpan(new RelativeSizeSpan(2f), 0, subtitle.length(), 0);
     // make it orange
     subtitle.setSpan(
-        new android.text.style.ForegroundColorSpan(Color.rgb(255, 165, 0)),
+        new android.text.style.ForegroundColorSpan(Color.rgb(255, 255, 255)),
         0,
         subtitle.length(),
         0);
-    builder.append(subtitle);
+    buildSubtitle.append(subtitle);
+    wrappedSubtitle.setText(subtitle);
 
     // Top 5 Songs
-    builder.append(top5Songs + "\n\n");
+    buildSongs.append(top5Songs + "\n\n");
+    wrappedSongs.setText(buildSongs);
 
     // Subtitle Top 5 Artists:
-    subtitle = new SpannableString("Top 5 Artists:\n");
+    subtitle = new SpannableString("Top 5 Artists\n");
     subtitle.setSpan(
         new android.text.style.StyleSpan(android.graphics.Typeface.BOLD), 0, subtitle.length(), 0);
     subtitle.setSpan(new RelativeSizeSpan(2f), 0, subtitle.length(), 0);
     // make it red
     subtitle.setSpan(
-        new android.text.style.ForegroundColorSpan(Color.RED), 0, subtitle.length(), 0);
-    builder.append(subtitle);
+        new android.text.style.ForegroundColorSpan(Color.WHITE), 0, subtitle.length(), 0);
+    buildSubtitle.append(subtitle);
+    wrappedSubtitle2.setText(subtitle);
 
     // Top 5 Artists
-    builder.append(top5Artists + "\n\n");
+    buildArtists.append(top5Artists + "\n\n");
+    wrappedArtists.setText(buildArtists);
 
     // Subtitle Total Genres:
-    subtitle = new SpannableString("Total Genres:\n");
+    subtitle = new SpannableString("Total Genres\n");
     subtitle.setSpan(
         new android.text.style.StyleSpan(android.graphics.Typeface.BOLD), 0, subtitle.length(), 0);
     subtitle.setSpan(new RelativeSizeSpan(2f), 0, subtitle.length(), 0);
     // make it blue
     subtitle.setSpan(
-        new android.text.style.ForegroundColorSpan(Color.CYAN), 0, subtitle.length(), 0);
-    builder.append(subtitle);
+        new android.text.style.ForegroundColorSpan(Color.WHITE), 0, subtitle.length(), 0);
+    buildSubtitle.append(subtitle);
+    wrappedSubtitle3.setText(subtitle);
 
     // Total Genres
     SpannableString number = new SpannableString(totalGenres);
     number.setSpan(
         new android.text.style.StyleSpan(android.graphics.Typeface.BOLD), 0, number.length(), 0);
     number.setSpan(new RelativeSizeSpan(3f), 0, number.length(), 0);
-    builder.append(number);
+    wrappedNumber.setText(number);
 
     // Subtitle Top 5 Genres:
-    subtitle = new SpannableString("\nTop 5 Genres:\n");
+    subtitle = new SpannableString("Top 5 Genres\n");
     subtitle.setSpan(
         new android.text.style.StyleSpan(android.graphics.Typeface.BOLD), 0, subtitle.length(), 0);
     subtitle.setSpan(new RelativeSizeSpan(2f), 0, subtitle.length(), 0);
     // make it green
     subtitle.setSpan(
         new android.text.style.ForegroundColorSpan(Color.WHITE), 0, subtitle.length(), 0);
-    builder.append(subtitle);
+    buildSubtitle.append(subtitle);
+    wrappedSubtitle4.setText(subtitle);
 
     // Top 5 Genres
-    builder.append(top5Genres + "\n\n");
-
-    // Set the text
-    textView.setText(builder);
+    buildGenres.append(top5Genres + "\n\n");
+    wrappedGenres.setText(buildGenres);
   }
 }
