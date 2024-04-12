@@ -27,19 +27,35 @@
             android:drawableLeft="@drawable/spotify_icon"
             android:text="Sign in with Spotify" />
 
-        <TextView
-            android:id="@+id/code_text_view"
+        <Button
+            android:id="@+id/wrapped_btn"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_margin="8dp"
-            tools:text="Code:" />
+            android:text="Generate Wrapped" />
 
         <Button
-            android:id="@+id/code_btn"
+            android:id="@+id/game_btn"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_margin="8dp"
-            android:text="Request Code" />
+            android:text="Play game" />
+
+        <Button
+            android:id="@+id/profile_btn"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Get Song Recommendations" />
+
+        <Button
+            android:id="@+id/artist_recom_btn"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Get Artist Recommendations" />
+
+        <Button
+            android:id="@+id/previous_wrapped_btn"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Show Previous Wrappeds" />
 
         <TextView
             android:id="@+id/response_text_view"
@@ -47,44 +63,6 @@
             android:layout_height="wrap_content"
             android:textSize="10sp"
             tools:text="Line 1\nLine 2\nLine 3" />
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content">
-
-            <Button
-                android:id="@+id/profile_btn"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_vertical"
-                android:layout_margin="8dp"
-                android:layout_weight="1"
-                android:text="Get Recommendations" />
-        </LinearLayout>
-
-        <Button
-            android:id="@+id/JSON_btn"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Get top 5 artists" />
-
-        <Button
-            android:id="@+id/JSON_btn2"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Get top 5 songs" />
-
-        <Button
-            android:id="@+id/genre_btn"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Get top 5 genres" />
-
-        <Button
-            android:id="@+id/game_btn"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Play game" />
 
         <Button
             android:id="@+id/modify_btn"
