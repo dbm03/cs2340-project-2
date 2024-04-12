@@ -3,9 +3,12 @@ package com.team4.spotifywrapped;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -16,7 +19,6 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.team4.spotifywrapped.data.PreviousWrappedSelectItem;
-import com.team4.spotifywrapped.interfaces.ClickListener;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -25,11 +27,14 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-public class PreviousWrappedSelectScreen extends AppCompatActivity {
+public class PreviousWrappedSelectScreen extends AppCompatActivity
+    implements PreviousWrappedAdapter.ItemClickListener {
 
   private FirebaseAuth mAuth;
-  private List<PreviousWrappedSelectItem> selectItems;
+  private List<String> selectItems;
   private List<Map<String, Object>> firebaseItems;
+
+  private PreviousWrappedAdapter adapter;
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -92,47 +97,37 @@ public class PreviousWrappedSelectScreen extends AppCompatActivity {
                     firebaseItems.add(newWrapped);
 
                     PreviousWrappedSelectItem newItem = new PreviousWrappedSelectItem(title, i);
-                    selectItems.add(newItem);
+                    selectItems.add(newItem.getText());
                   }
 
-                  PreviousWrappedAdapter adapter =
-                      new PreviousWrappedAdapter(
-                          selectItems,
-                          new ClickListener() {
-                            @Override
-                            public void onPositionClicked(int position) {
-                              Log.d("Clicked option", "Clicked option " + position);
-
-                              Map<String, Object> selectedWrapped = firebaseItems.get(position);
-                              String top5Songs = (String) selectedWrapped.get("top5Songs");
-                              String top5Artists = (String) selectedWrapped.get("top5Artists");
-                              String totalGenres = (String) selectedWrapped.get("totalGenres");
-                              String top5Genres = (String) selectedWrapped.get("top5Genres");
-
-                              redirectToWrapped(top5Songs, top5Artists, totalGenres, top5Genres);
-                            }
-
-                            @Override
-                            public void onLongClicked(int position) {
-                              Log.d("Clicked option", "Long Clicked option " + position);
-
-                              Map<String, Object> selectedWrapped = firebaseItems.get(position);
-                              String top5Songs = (String) selectedWrapped.get("top5Songs");
-                              String top5Artists = (String) selectedWrapped.get("top5Artists");
-                              String totalGenres = (String) selectedWrapped.get("totalGenres");
-                              String top5Genres = (String) selectedWrapped.get("top5Genres");
-
-                              redirectToWrapped(top5Songs, top5Artists, totalGenres, top5Genres);
-                            }
-                          });
-
                   RecyclerView recyclerView = findViewById(R.id.recycler_view);
+                  recyclerView.setLayoutManager(
+                      new LinearLayoutManager(PreviousWrappedSelectScreen.this));
+                  adapter =
+                      new PreviousWrappedAdapter(PreviousWrappedSelectScreen.this, selectItems);
+                  adapter.setClickListener(PreviousWrappedSelectScreen.this);
                   recyclerView.setAdapter(adapter);
                 } else {
                   Log.d("Firebase", "Error fetching from firestore");
                 }
               }
             });
+  }
+
+  @Override
+  public void onItemClick(View view, int position) {
+    Toast.makeText(
+            this,
+            "You clicked " + adapter.getItem(position) + " on row number " + position,
+            Toast.LENGTH_SHORT)
+        .show();
+    Map<String, Object> selectedWrapped = firebaseItems.get(position);
+    String top5Songs = (String) selectedWrapped.get("top5Songs");
+    String top5Artists = (String) selectedWrapped.get("top5Artists");
+    String totalGenres = (String) selectedWrapped.get("totalGenres");
+    String top5Genres = (String) selectedWrapped.get("top5Genres");
+
+    redirectToWrapped(top5Songs, top5Artists, totalGenres, top5Genres);
   }
 
   private void redirectToWrapped(
