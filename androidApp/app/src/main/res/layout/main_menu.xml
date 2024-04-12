@@ -42,8 +42,8 @@
             android:text="Request Code" />
 
         <TextView
-            android:id="@+id/response_text_view"
-            android:layout_width="match_parent"
+            android:id="@+id/response_text_view"sdsaduahdaiua
+            android:layout_width="match_parent"auisdhfiausfhaidsf
             android:layout_height="wrap_content"
             android:textSize="10sp"
             tools:text="Line 1\nLine 2\nLine 3" />
