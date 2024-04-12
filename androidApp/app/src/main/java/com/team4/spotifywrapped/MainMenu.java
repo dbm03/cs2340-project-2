@@ -1,6 +1,7 @@
 package com.team4.spotifywrapped;
 
 import static java.lang.Thread.sleep;
+import java.time.Instant;
 
 import android.os.Bundle;
 import android.content.Intent;
@@ -22,10 +23,14 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.FirebaseFirestore;
 import com.spotify.sdk.android.auth.AuthorizationClient;
 import com.spotify.sdk.android.auth.AuthorizationRequest;
 import com.spotify.sdk.android.auth.AuthorizationResponse;
@@ -52,6 +57,8 @@ public class MainMenu extends AppCompatActivity {
   public static final String CLIENT_ID = "ab2d3ae0a0ee47a6990b4774ad98c805";
   public static final String REDIRECT_URI = "spotifysdk://auth";
 
+  public static final String FIREBASE_TAG = "Firebase";
+
   public static final int AUTH_TOKEN_REQUEST_CODE = 0;
   public static final int AUTH_CODE_REQUEST_CODE = 1;
 
@@ -68,6 +75,8 @@ public class MainMenu extends AppCompatActivity {
   private final OkHttpClient mOkHttpClient = new OkHttpClient();
   private String mAccessToken, mAccessCode;
   private Call mCall;
+
+  private Button previousWrappedBtn;
 
   private TextView tokenTextView, codeTextView, profileTextView;
 
@@ -100,6 +109,7 @@ public class MainMenu extends AppCompatActivity {
     Button gameBtn = (Button) findViewById(R.id.game_btn);
     Button wrappedBtn = (Button) findViewById(R.id.wrapped_btn);
     Button recommendationsBtn = (Button) findViewById(R.id.artist_recom_btn);
+    previousWrappedBtn = (Button) findViewById(R.id.previous_wrapped_btn);
 
     // Set the click listeners for the buttons
 
@@ -140,6 +150,11 @@ public class MainMenu extends AppCompatActivity {
             showPopupMenu(v);
           }
         });
+
+    previousWrappedBtn.setOnClickListener(
+        (v) -> {
+          getPreviousWrappeds();
+        });
   }
 
   @Override
@@ -153,6 +168,12 @@ public class MainMenu extends AppCompatActivity {
           "currentUser:" + currentUser.getDisplayName() + " email:" + currentUser.getEmail());
       // User already signed in
     }
+  }
+
+  private void getPreviousWrappeds() {
+    Intent intent = new Intent(MainMenu.this, PreviousWrappedSelectScreen.class);
+
+    startActivity(intent);
   }
 
   private void generateWrapped(TextView textView, String timeFrame) {
@@ -216,11 +237,52 @@ public class MainMenu extends AppCompatActivity {
 
     // runOnUiThread(() -> textView.setText(finalText_str));
     // Start the wrapped activity
+
+    FirebaseFirestore db = FirebaseFirestore.getInstance();
+
+    long now = Instant.now().toEpochMilli();
+
+    Map<String, Object> wrappedData = new HashMap<>();
+    wrappedData.put("top5Songs", top5SongsStr);
+    wrappedData.put("top5Artists", top5ArtistsStr);
+    wrappedData.put("totalGenres", (String.valueOf(total_genres)));
+    wrappedData.put("top5Genres", top5GenresStr);
+    wrappedData.put("epoch", now);
+
+    String userUid = mAuth.getUid();
+
+    if (userUid != null) {
+      db.collection("users")
+          .document(userUid)
+          .collection("wrappeds")
+          .add(wrappedData)
+          .addOnSuccessListener(
+              new OnSuccessListener<DocumentReference>() {
+                @Override
+                public void onSuccess(DocumentReference documentReference) {
+                  Log.d(
+                      FIREBASE_TAG, "Document snapshot added with ID:" + documentReference.getId());
+                }
+              })
+          .addOnFailureListener(
+              new OnFailureListener() {
+                @Override
+                public void onFailure(@NonNull Exception e) {
+                  Log.d(FIREBASE_TAG, "Error saving spotify wrapped data to database");
+                }
+              });
+    }
+
+    redirectToWrapped(top5SongsStr, top5ArtistsStr, (String.valueOf(total_genres)), top5GenresStr);
+  }
+
+  private void redirectToWrapped(
+      String top5SongsStr, String top5ArtistsStr, String totalGenres, String top5GenresStr) {
     Intent intent = new Intent(MainMenu.this, WrappedScreen.class);
     // put the final text string in the intent
     intent.putExtra("top5Songs", top5SongsStr);
     intent.putExtra("top5Artists", top5ArtistsStr);
-    intent.putExtra("totalGenres", (String.valueOf(total_genres)));
+    intent.putExtra("totalGenres", totalGenres);
     intent.putExtra("top5Genres", top5GenresStr);
 
     startActivity(intent);

@@ -51,6 +51,12 @@
             android:layout_height="wrap_content"
             android:text="Get Artist Recommendations" />
 
+        <Button
+            android:id="@+id/previous_wrapped_btn"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Show Previous Wrappeds" />
+
         <TextView
             android:id="@+id/response_text_view"
             android:layout_width="match_parent"
