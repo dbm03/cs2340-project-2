@@ -1,5 +1,7 @@
 package com.team4.spotifywrapped;
 
+import com.google.android.material.bottomnavigation.BottomNavigationView;
+
 import static java.lang.Thread.sleep;
 import java.time.Instant;
 
@@ -85,8 +87,16 @@ public class MainMenu extends AppCompatActivity {
   @Override
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
-
     setContentView(R.layout.main_menu);
+
+    if (savedInstanceState == null) {
+      getSupportFragmentManager()
+          .beginTransaction()
+          .replace(R.id.fragment_container, new WrappedFragment())
+          .commit();
+    }
+
+    setupBottomNavigationView();
 
     mAuth = FirebaseAuth.getInstance();
 
@@ -110,16 +120,12 @@ public class MainMenu extends AppCompatActivity {
     Button wrappedBtn = (Button) findViewById(R.id.wrapped_btn);
     Button recommendationsBtn = (Button) findViewById(R.id.artist_recom_btn);
     previousWrappedBtn = (Button) findViewById(R.id.previous_wrapped_btn);
-    Button modifyBtn = (Button) findViewById(R.id.modify_btn);
-    Button logOutBtn = (Button) findViewById(R.id.logout_btn);
     Button game2Btn = (Button) findViewById(R.id.game2_btn);
 
-    // Set the click listeners for the buttons
-
     tokenBtn.setOnClickListener(
-            (v) -> {
-              getToken();
-            });
+        (v) -> {
+          getToken();
+        });
 
     /*codeBtn.setOnClickListener(
     (v) -> {
@@ -127,55 +133,101 @@ public class MainMenu extends AppCompatActivity {
     });*/
 
     profileBtn.setOnClickListener(
-            (v) -> {
-              getRecommendations();
-            });
+        (v) -> {
+          getRecommendations();
+        });
 
     gameBtn.setOnClickListener(
-            (v) -> {
-              try {
-                Toast.makeText(this, "Playing game, this may take a while", Toast.LENGTH_SHORT).show();
-                play_game();
-              } catch (InterruptedException e) {
-                e.printStackTrace();
-              }
-            });
+        (v) -> {
+          try {
+            Toast.makeText(this, "Playing game, this may take a while", Toast.LENGTH_SHORT).show();
+            play_game();
+          } catch (InterruptedException e) {
+            e.printStackTrace();
+          }
+        });
 
     recommendationsBtn.setOnClickListener(
-            (v) -> {
-              getArtistRecommendations();
-            });
+        (v) -> {
+          getArtistRecommendations();
+        });
 
     wrappedBtn.setOnClickListener(
-            new View.OnClickListener() {
-              @Override
-              public void onClick(View v) {
-                showPopupMenu(v);
-              }
-            });
+        new View.OnClickListener() {
+          @Override
+          public void onClick(View v) {
+            showPopupMenu(v);
+          }
+        });
 
     previousWrappedBtn.setOnClickListener(
-            (v) -> {
-              getPreviousWrappeds();
-            });
-
-    modifyBtn.setOnClickListener(
-            (v) -> {
-              Intent intent = new Intent(MainMenu.this, ModifyUser.class);
-              startActivity(intent);
-            });
-
-    logOutBtn.setOnClickListener(
-            (v) -> {
-              mAuth.signOut();
-              Intent intent = new Intent(MainMenu.this, StartupScreen.class);
-              startActivity(intent);
-            });
+        (v) -> {
+          getPreviousWrappeds();
+        });
 
     game2Btn.setOnClickListener(
-            (v) -> {
-              playgame2();
-            });
+        (v) -> {
+          playgame2();
+        });
+  }
+
+  private void setupBottomNavigationView() {
+    BottomNavigationView navView = findViewById(R.id.bottom_navigation);
+    navView.setOnNavigationItemSelectedListener(
+        item -> {
+          int id = item.getItemId();
+          if (id == R.id.navigation_wrapped) {
+            showWrappedControls(true);
+            showGamesControls(false);
+            showProfileControls(true);
+            return true;
+          } else if (id == R.id.navigation_games) {
+            showWrappedControls(false);
+            showGamesControls(true);
+            showProfileControls(false);
+            return true;
+          } else if (id == R.id.navigation_profile) {
+            showWrappedControls(false);
+            showGamesControls(false);
+            showProfileControls(true);
+            return true;
+          }
+          return false;
+        });
+
+    showWrappedControls(true);
+    showGamesControls(false);
+    showProfileControls(false);
+  }
+
+  private void showWrappedControls(boolean show) {
+    int visibility = show ? View.VISIBLE : View.GONE;
+    findViewById(R.id.wrapped_btn).setVisibility(visibility);
+    findViewById(R.id.artist_recom_btn).setVisibility(visibility);
+    findViewById(R.id.previous_wrapped_btn).setVisibility(visibility);
+    findViewById(R.id.profile_btn).setVisibility(visibility);
+    // Add any other Wrapped related controls here
+  }
+
+  private void showGamesControls(boolean show) {
+    int visibility = show ? View.VISIBLE : View.GONE;
+    findViewById(R.id.game_btn).setVisibility(visibility);
+    findViewById(R.id.game2_btn).setVisibility(visibility);
+    // Add any other Games related controls here
+  }
+
+  private void showProfileControls(boolean show) {
+    int visibility = show ? View.VISIBLE : View.GONE;
+    // Assuming you add Profile related buttons or text views
+    // findViewById(R.id.some_profile_btn).setVisibility(visibility);
+    // Add any other Profile related controls here
+  }
+
+  private void showProfileScreen() {
+    getSupportFragmentManager()
+        .beginTransaction()
+        .replace(R.id.fragment_container, new ProfileFragment())
+        .commit();
   }
 
   @Override
@@ -185,8 +237,8 @@ public class MainMenu extends AppCompatActivity {
     FirebaseUser currentUser = mAuth.getCurrentUser();
     if (currentUser != null) {
       Log.d(
-              "MainMenuStart",
-              "currentUser:" + currentUser.getDisplayName() + " email:" + currentUser.getEmail());
+          "MainMenuStart",
+          "currentUser:" + currentUser.getDisplayName() + " email:" + currentUser.getEmail());
       // User already signed in
     }
   }
@@ -248,11 +300,11 @@ public class MainMenu extends AppCompatActivity {
 
     // Sort the genres by the number of times they appear
     genres =
-            genres.entrySet().stream()
-                    .sorted(Map.Entry.comparingByValue(Comparator.reverseOrder()))
-                    .collect(
-                            Collectors.toMap(
-                                    Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
+        genres.entrySet().stream()
+            .sorted(Map.Entry.comparingByValue(Comparator.reverseOrder()))
+            .collect(
+                Collectors.toMap(
+                    Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
 
     // Get the top 5 genres
     int i = 0;
@@ -268,14 +320,14 @@ public class MainMenu extends AppCompatActivity {
     }
 
     String finalText_str =
-            "Top 5 Songs: "
-                    + top5SongsStr
-                    + "\nTop 5 Artists: "
-                    + top5ArtistsStr
-                    + "\nTotal Genres: "
-                    + total_genres
-                    + "\nTop 5 Genres: "
-                    + top5GenresStr;
+        "Top 5 Songs: "
+            + top5SongsStr
+            + "\nTop 5 Artists: "
+            + top5ArtistsStr
+            + "\nTotal Genres: "
+            + total_genres
+            + "\nTop 5 Genres: "
+            + top5GenresStr;
 
     // runOnUiThread(() -> textView.setText(finalText_str));
     // Start the wrapped activity
@@ -295,31 +347,31 @@ public class MainMenu extends AppCompatActivity {
 
     if (userUid != null) {
       db.collection("users")
-              .document(userUid)
-              .collection("wrappeds")
-              .add(wrappedData)
-              .addOnSuccessListener(
-                      new OnSuccessListener<DocumentReference>() {
-                        @Override
-                        public void onSuccess(DocumentReference documentReference) {
-                          Log.d(
-                                  FIREBASE_TAG, "Document snapshot added with ID:" + documentReference.getId());
-                        }
-                      })
-              .addOnFailureListener(
-                      new OnFailureListener() {
-                        @Override
-                        public void onFailure(@NonNull Exception e) {
-                          Log.d(FIREBASE_TAG, "Error saving spotify wrapped data to database");
-                        }
-                      });
+          .document(userUid)
+          .collection("wrappeds")
+          .add(wrappedData)
+          .addOnSuccessListener(
+              new OnSuccessListener<DocumentReference>() {
+                @Override
+                public void onSuccess(DocumentReference documentReference) {
+                  Log.d(
+                      FIREBASE_TAG, "Document snapshot added with ID:" + documentReference.getId());
+                }
+              })
+          .addOnFailureListener(
+              new OnFailureListener() {
+                @Override
+                public void onFailure(@NonNull Exception e) {
+                  Log.d(FIREBASE_TAG, "Error saving spotify wrapped data to database");
+                }
+              });
     }
 
     redirectToWrapped(top5SongsStr, top5ArtistsStr, (String.valueOf(total_genres)), top5GenresStr);
   }
 
   private void redirectToWrapped(
-          String top5SongsStr, String top5ArtistsStr, String totalGenres, String top5GenresStr) {
+      String top5SongsStr, String top5ArtistsStr, String totalGenres, String top5GenresStr) {
     Intent intent = new Intent(MainMenu.this, WrappedScreen.class);
     // put the final text string in the intent
     intent.putExtra("top5Songs", top5SongsStr);
@@ -335,13 +387,13 @@ public class MainMenu extends AppCompatActivity {
     popupMenu.getMenuInflater().inflate(R.menu.popup_menu, popupMenu.getMenu());
 
     popupMenu.setOnMenuItemClickListener(
-            new PopupMenu.OnMenuItemClickListener() {
-              @Override
-              public boolean onMenuItemClick(MenuItem item) {
-                executeMethodBasedOnOption(item.getTitle().toString());
-                return true;
-              }
-            });
+        new PopupMenu.OnMenuItemClickListener() {
+          @Override
+          public boolean onMenuItemClick(MenuItem item) {
+            executeMethodBasedOnOption(item.getTitle().toString());
+            return true;
+          }
+        });
 
     popupMenu.show();
   }
@@ -351,21 +403,21 @@ public class MainMenu extends AppCompatActivity {
     switch (option) {
       case "Short":
         Toast.makeText(this, "Short term selected, this may take a while", Toast.LENGTH_SHORT)
-                .show();
+            .show();
         loadingDialog.showDialog("Generating Wrapped...");
         generateWrapped(profileTextView, "short_term");
         loadingDialog.hideDialog();
         break;
       case "Medium":
         Toast.makeText(this, "Medium term selected, this may take a while", Toast.LENGTH_SHORT)
-                .show();
+            .show();
         loadingDialog.showDialog("Generating Wrapped...");
         generateWrapped(profileTextView, "medium_term");
         loadingDialog.hideDialog();
         break;
       case "Long":
         Toast.makeText(this, "Long term selected, this may take a while", Toast.LENGTH_SHORT)
-                .show();
+            .show();
         loadingDialog.showDialog("Generating Wrapped...");
         generateWrapped(profileTextView, "long_term");
         loadingDialog.hideDialog();
@@ -390,19 +442,19 @@ public class MainMenu extends AppCompatActivity {
     if (userName == null) userName = "";
 
     new AlertDialog.Builder(MainMenu.this)
-            .setTitle("Welcome Back!")
-            .setMessage("You are signed in as " + userName)
-            .setPositiveButton("Continue", (dialog, which) -> {})
-            .setNegativeButton(
-                    "Change User",
-                    (dialog, which) -> {
-                      // User chooses to change user, sign out and start the sign-in flow again
-                      mAuth.signOut();
-                      Intent intent = new Intent(MainMenu.this, StartupScreen.class);
-                      startActivity(intent);
-                    })
-            .setIcon(android.R.drawable.ic_dialog_info)
-            .show();
+        .setTitle("Welcome Back!")
+        .setMessage("You are signed in as " + userName)
+        .setPositiveButton("Continue", (dialog, which) -> {})
+        .setNegativeButton(
+            "Change User",
+            (dialog, which) -> {
+              // User chooses to change user, sign out and start the sign-in flow again
+              mAuth.signOut();
+              Intent intent = new Intent(MainMenu.this, StartupScreen.class);
+              startActivity(intent);
+            })
+        .setIcon(android.R.drawable.ic_dialog_info)
+        .show();
   }
 
   /**
@@ -426,18 +478,18 @@ public class MainMenu extends AppCompatActivity {
   public void signUpSpotifyWrappedAccount(String email, String id) {
     String TAG = "SpotifyWrapped Sign Up";
     mAuth
-            .createUserWithEmailAndPassword(email, id)
-            .addOnCompleteListener(
-                    this,
-                    new OnCompleteListener<AuthResult>() {
-                      @Override
-                      public void onComplete(@NonNull Task<AuthResult> task) {
-                        if (task.isSuccessful()) {
-                          Log.d(
-                                  TAG, "Created user with " + email + " and password: " + id + " successfully");
-                        }
-                      }
-                    });
+        .createUserWithEmailAndPassword(email, id)
+        .addOnCompleteListener(
+            this,
+            new OnCompleteListener<AuthResult>() {
+              @Override
+              public void onComplete(@NonNull Task<AuthResult> task) {
+                if (task.isSuccessful()) {
+                  Log.d(
+                      TAG, "Created user with " + email + " and password: " + id + " successfully");
+                }
+              }
+            });
   }
 
   /**
@@ -478,10 +530,10 @@ public class MainMenu extends AppCompatActivity {
     } catch (JSONException e) {
       Log.d("JSON", "Failed to parse data: " + e);
       Toast.makeText(
-                      MainMenu.this,
-                      "Failed to parse data, watch Logcat for more details",
-                      Toast.LENGTH_SHORT)
-              .show();
+              MainMenu.this,
+              "Failed to parse data, watch Logcat for more details",
+              Toast.LENGTH_SHORT)
+          .show();
     }
 
     return hash_vals;
@@ -504,10 +556,10 @@ public class MainMenu extends AppCompatActivity {
     } catch (JSONException e) {
       Log.d("JSON", "Failed to parse data: " + e);
       Toast.makeText(
-                      MainMenu.this,
-                      "Failed to parse data, watch Logcat for more details",
-                      Toast.LENGTH_SHORT)
-              .show();
+              MainMenu.this,
+              "Failed to parse data, watch Logcat for more details",
+              Toast.LENGTH_SHORT)
+          .show();
     }
 
     return hash_vals;
@@ -535,16 +587,16 @@ public class MainMenu extends AppCompatActivity {
         }
         // Now you can safely call get(key) on the JSONObject
         hash_vals.put(
-                item.getString("name"), artist); // Use getString to directly get the String value
+            item.getString("name"), artist); // Use getString to directly get the String value
       }
 
     } catch (JSONException e) {
       Log.d("JSON", "Failed to parse data: " + e);
       Toast.makeText(
-                      MainMenu.this,
-                      "Failed to parse data, watch Logcat for more details",
-                      Toast.LENGTH_SHORT)
-              .show();
+              MainMenu.this,
+              "Failed to parse data, watch Logcat for more details",
+              Toast.LENGTH_SHORT)
+          .show();
     }
 
     return hash_vals;
@@ -575,10 +627,10 @@ public class MainMenu extends AppCompatActivity {
     } catch (JSONException e) {
       Log.d("JSON", "Failed to parse data: " + e);
       Toast.makeText(
-                      MainMenu.this,
-                      "Failed to parse data, watch Logcat for more details",
-                      Toast.LENGTH_SHORT)
-              .show();
+              MainMenu.this,
+              "Failed to parse data, watch Logcat for more details",
+              Toast.LENGTH_SHORT)
+          .show();
     }
 
     return hash_vals;
@@ -604,18 +656,18 @@ public class MainMenu extends AppCompatActivity {
         }
 
         hash_vals.put(
-                item.getString("name"),
-                new Pair<>(
-                        item.getString("id"), image)); // Use getString to directly get the String value
+            item.getString("name"),
+            new Pair<>(
+                item.getString("id"), image)); // Use getString to directly get the String value
       }
 
     } catch (JSONException e) {
       Log.d("JSON", "Failed to parse data: " + e);
       Toast.makeText(
-                      MainMenu.this,
-                      "Failed to parse data, watch Logcat for more details",
-                      Toast.LENGTH_SHORT)
-              .show();
+              MainMenu.this,
+              "Failed to parse data, watch Logcat for more details",
+              Toast.LENGTH_SHORT)
+          .show();
     }
 
     return hash_vals;
@@ -628,44 +680,44 @@ public class MainMenu extends AppCompatActivity {
 
     // Create a request to get the user profile
     final Request request =
-            new Request.Builder()
-                    .url(url_parameter)
-                    .addHeader("Authorization", "Bearer " + mAccessToken)
-                    .build();
+        new Request.Builder()
+            .url(url_parameter)
+            .addHeader("Authorization", "Bearer " + mAccessToken)
+            .build();
 
     cancelCall();
     mCall = mOkHttpClient.newCall(request);
 
     mCall.enqueue(
-            new Callback() {
-              @Override
-              public void onFailure(Call call, IOException e) {
-                Log.d("HTTP", "Failed to fetch data: " + e);
-                Toast.makeText(
-                                MainMenu.this,
-                                "Failed to fetch data, watch Logcat for more details",
-                                Toast.LENGTH_SHORT)
-                        .show();
-              }
+        new Callback() {
+          @Override
+          public void onFailure(Call call, IOException e) {
+            Log.d("HTTP", "Failed to fetch data: " + e);
+            Toast.makeText(
+                    MainMenu.this,
+                    "Failed to fetch data, watch Logcat for more details",
+                    Toast.LENGTH_SHORT)
+                .show();
+          }
 
-              @Override
-              public void onResponse(Call call, Response response) throws IOException {
-                try {
-                  final JSONObject jsonObject = new JSONObject(response.body().string());
-                  setTextAsync(jsonObject.toString(3), profileTextView);
-                  String email = (String) jsonObject.get("email");
-                  String id = (String) jsonObject.get("id");
-                  signUpSpotifyWrappedAccount(email, id);
-                } catch (JSONException e) {
-                  Log.d("JSON", "Failed to parse data: " + e);
-                  Toast.makeText(
-                                  MainMenu.this,
-                                  "Failed to parse data, watch Logcat for more details",
-                                  Toast.LENGTH_SHORT)
-                          .show();
-                }
-              }
-            });
+          @Override
+          public void onResponse(Call call, Response response) throws IOException {
+            try {
+              final JSONObject jsonObject = new JSONObject(response.body().string());
+              setTextAsync(jsonObject.toString(3), profileTextView);
+              String email = (String) jsonObject.get("email");
+              String id = (String) jsonObject.get("id");
+              signUpSpotifyWrappedAccount(email, id);
+            } catch (JSONException e) {
+              Log.d("JSON", "Failed to parse data: " + e);
+              Toast.makeText(
+                      MainMenu.this,
+                      "Failed to parse data, watch Logcat for more details",
+                      Toast.LENGTH_SHORT)
+                  .show();
+            }
+          }
+        });
   }
 
   public void spotifyRequest_song(String url_parameter) {
@@ -675,41 +727,41 @@ public class MainMenu extends AppCompatActivity {
 
     // Create a request to get the user profile
     final Request request =
-            new Request.Builder()
-                    .url(url_parameter)
-                    .addHeader("Authorization", "Bearer " + mAccessToken)
-                    .build();
+        new Request.Builder()
+            .url(url_parameter)
+            .addHeader("Authorization", "Bearer " + mAccessToken)
+            .build();
 
     cancelCall();
     mCall = mOkHttpClient.newCall(request);
 
     mCall.enqueue(
-            new Callback() {
-              @Override
-              public void onFailure(Call call, IOException e) {
-                Log.d("HTTP", "Failed to fetch data: " + e);
-                Toast.makeText(
-                                MainMenu.this,
-                                "Failed to fetch data, watch Logcat for more details",
-                                Toast.LENGTH_SHORT)
-                        .show();
-              }
+        new Callback() {
+          @Override
+          public void onFailure(Call call, IOException e) {
+            Log.d("HTTP", "Failed to fetch data: " + e);
+            Toast.makeText(
+                    MainMenu.this,
+                    "Failed to fetch data, watch Logcat for more details",
+                    Toast.LENGTH_SHORT)
+                .show();
+          }
 
-              @Override
-              public void onResponse(Call call, Response response) throws IOException {
-                try {
-                  final JSONObject jsonObject = new JSONObject(response.body().string());
-                  display_and_save_song(jsonObject, profileTextView);
-                } catch (JSONException e) {
-                  Log.d("JSON", "Failed to parse data: " + e);
-                  Toast.makeText(
-                                  MainMenu.this,
-                                  "Failed to parse data, watch Logcat for more details",
-                                  Toast.LENGTH_SHORT)
-                          .show();
-                }
-              }
-            });
+          @Override
+          public void onResponse(Call call, Response response) throws IOException {
+            try {
+              final JSONObject jsonObject = new JSONObject(response.body().string());
+              display_and_save_song(jsonObject, profileTextView);
+            } catch (JSONException e) {
+              Log.d("JSON", "Failed to parse data: " + e);
+              Toast.makeText(
+                      MainMenu.this,
+                      "Failed to parse data, watch Logcat for more details",
+                      Toast.LENGTH_SHORT)
+                  .show();
+            }
+          }
+        });
   }
 
   public void spotifyRequest_artist(String url_parameter) {
@@ -719,41 +771,41 @@ public class MainMenu extends AppCompatActivity {
 
     // Create a request to get the user profile
     final Request request =
-            new Request.Builder()
-                    .url(url_parameter)
-                    .addHeader("Authorization", "Bearer " + mAccessToken)
-                    .build();
+        new Request.Builder()
+            .url(url_parameter)
+            .addHeader("Authorization", "Bearer " + mAccessToken)
+            .build();
 
     cancelCall();
     mCall = mOkHttpClient.newCall(request);
 
     mCall.enqueue(
-            new Callback() {
-              @Override
-              public void onFailure(Call call, IOException e) {
-                Log.d("HTTP", "Failed to fetch data: " + e);
-                Toast.makeText(
-                                MainMenu.this,
-                                "Failed to fetch data, watch Logcat for more details",
-                                Toast.LENGTH_SHORT)
-                        .show();
-              }
+        new Callback() {
+          @Override
+          public void onFailure(Call call, IOException e) {
+            Log.d("HTTP", "Failed to fetch data: " + e);
+            Toast.makeText(
+                    MainMenu.this,
+                    "Failed to fetch data, watch Logcat for more details",
+                    Toast.LENGTH_SHORT)
+                .show();
+          }
 
-              @Override
-              public void onResponse(Call call, Response response) throws IOException {
-                try {
-                  final JSONObject jsonObject = new JSONObject(response.body().string());
-                  display_and_save_artist(jsonObject, profileTextView);
-                } catch (JSONException e) {
-                  Log.d("JSON", "Failed to parse data: " + e);
-                  Toast.makeText(
-                                  MainMenu.this,
-                                  "Failed to parse data, watch Logcat for more details",
-                                  Toast.LENGTH_SHORT)
-                          .show();
-                }
-              }
-            });
+          @Override
+          public void onResponse(Call call, Response response) throws IOException {
+            try {
+              final JSONObject jsonObject = new JSONObject(response.body().string());
+              display_and_save_artist(jsonObject, profileTextView);
+            } catch (JSONException e) {
+              Log.d("JSON", "Failed to parse data: " + e);
+              Toast.makeText(
+                      MainMenu.this,
+                      "Failed to parse data, watch Logcat for more details",
+                      Toast.LENGTH_SHORT)
+                  .show();
+            }
+          }
+        });
   }
 
   public void spotifyRequest_recommendation(String url_parameter) {
@@ -763,41 +815,41 @@ public class MainMenu extends AppCompatActivity {
 
     // Create a request to get the user profile
     final Request request =
-            new Request.Builder()
-                    .url(url_parameter)
-                    .addHeader("Authorization", "Bearer " + mAccessToken)
-                    .build();
+        new Request.Builder()
+            .url(url_parameter)
+            .addHeader("Authorization", "Bearer " + mAccessToken)
+            .build();
 
     cancelCall();
     mCall = mOkHttpClient.newCall(request);
 
     mCall.enqueue(
-            new Callback() {
-              @Override
-              public void onFailure(Call call, IOException e) {
-                Log.d("HTTP", "Failed to fetch data: " + e);
-                Toast.makeText(
-                                MainMenu.this,
-                                "Failed to fetch data, watch Logcat for more details",
-                                Toast.LENGTH_SHORT)
-                        .show();
-              }
+        new Callback() {
+          @Override
+          public void onFailure(Call call, IOException e) {
+            Log.d("HTTP", "Failed to fetch data: " + e);
+            Toast.makeText(
+                    MainMenu.this,
+                    "Failed to fetch data, watch Logcat for more details",
+                    Toast.LENGTH_SHORT)
+                .show();
+          }
 
-              @Override
-              public void onResponse(Call call, Response response) throws IOException {
-                try {
-                  final JSONObject jsonObject = new JSONObject(response.body().string());
-                  display_and_save_recommendation(jsonObject, profileTextView);
-                } catch (JSONException e) {
-                  Log.d("JSON", "Failed to parse data: " + e);
-                  Toast.makeText(
-                                  MainMenu.this,
-                                  "Failed to parse data, watch Logcat for more details",
-                                  Toast.LENGTH_SHORT)
-                          .show();
-                }
-              }
-            });
+          @Override
+          public void onResponse(Call call, Response response) throws IOException {
+            try {
+              final JSONObject jsonObject = new JSONObject(response.body().string());
+              display_and_save_recommendation(jsonObject, profileTextView);
+            } catch (JSONException e) {
+              Log.d("JSON", "Failed to parse data: " + e);
+              Toast.makeText(
+                      MainMenu.this,
+                      "Failed to parse data, watch Logcat for more details",
+                      Toast.LENGTH_SHORT)
+                  .show();
+            }
+          }
+        });
   }
 
   public void spotifyRequest_artist_recommendation(String url_parameter) {
@@ -807,41 +859,41 @@ public class MainMenu extends AppCompatActivity {
 
     // Create a request to get the user profile
     final Request request =
-            new Request.Builder()
-                    .url(url_parameter)
-                    .addHeader("Authorization", "Bearer " + mAccessToken)
-                    .build();
+        new Request.Builder()
+            .url(url_parameter)
+            .addHeader("Authorization", "Bearer " + mAccessToken)
+            .build();
 
     cancelCall();
     mCall = mOkHttpClient.newCall(request);
 
     mCall.enqueue(
-            new Callback() {
-              @Override
-              public void onFailure(Call call, IOException e) {
-                Log.d("HTTP", "Failed to fetch data: " + e);
-                Toast.makeText(
-                                MainMenu.this,
-                                "Failed to fetch data, watch Logcat for more details",
-                                Toast.LENGTH_SHORT)
-                        .show();
-              }
+        new Callback() {
+          @Override
+          public void onFailure(Call call, IOException e) {
+            Log.d("HTTP", "Failed to fetch data: " + e);
+            Toast.makeText(
+                    MainMenu.this,
+                    "Failed to fetch data, watch Logcat for more details",
+                    Toast.LENGTH_SHORT)
+                .show();
+          }
 
-              @Override
-              public void onResponse(Call call, Response response) throws IOException {
-                try {
-                  final JSONObject jsonObject = new JSONObject(response.body().string());
-                  display_and_save_artist_recommendation(jsonObject, profileTextView);
-                } catch (JSONException e) {
-                  Log.d("JSON", "Failed to parse data: " + e);
-                  Toast.makeText(
-                                  MainMenu.this,
-                                  "Failed to parse data, watch Logcat for more details",
-                                  Toast.LENGTH_SHORT)
-                          .show();
-                }
-              }
-            });
+          @Override
+          public void onResponse(Call call, Response response) throws IOException {
+            try {
+              final JSONObject jsonObject = new JSONObject(response.body().string());
+              display_and_save_artist_recommendation(jsonObject, profileTextView);
+            } catch (JSONException e) {
+              Log.d("JSON", "Failed to parse data: " + e);
+              Toast.makeText(
+                      MainMenu.this,
+                      "Failed to parse data, watch Logcat for more details",
+                      Toast.LENGTH_SHORT)
+                  .show();
+            }
+          }
+        });
   }
 
   public void spotifyRequest_genres(String url_parameter) {
@@ -851,41 +903,41 @@ public class MainMenu extends AppCompatActivity {
 
     // Create a request to get the user profile
     final Request request =
-            new Request.Builder()
-                    .url(url_parameter)
-                    .addHeader("Authorization", "Bearer " + mAccessToken)
-                    .build();
+        new Request.Builder()
+            .url(url_parameter)
+            .addHeader("Authorization", "Bearer " + mAccessToken)
+            .build();
 
     cancelCall();
     mCall = mOkHttpClient.newCall(request);
 
     mCall.enqueue(
-            new Callback() {
-              @Override
-              public void onFailure(Call call, IOException e) {
-                Log.d("HTTP", "Failed to fetch data: " + e);
-                Toast.makeText(
-                                MainMenu.this,
-                                "Failed to fetch data, watch Logcat for more details",
-                                Toast.LENGTH_SHORT)
-                        .show();
-              }
+        new Callback() {
+          @Override
+          public void onFailure(Call call, IOException e) {
+            Log.d("HTTP", "Failed to fetch data: " + e);
+            Toast.makeText(
+                    MainMenu.this,
+                    "Failed to fetch data, watch Logcat for more details",
+                    Toast.LENGTH_SHORT)
+                .show();
+          }
 
-              @Override
-              public void onResponse(Call call, Response response) throws IOException {
-                try {
-                  final JSONObject jsonObject = new JSONObject(response.body().string());
-                  display_and_save_genres(jsonObject, profileTextView);
-                } catch (JSONException e) {
-                  Log.d("JSON", "Failed to parse data: " + e);
-                  Toast.makeText(
-                                  MainMenu.this,
-                                  "Failed to parse data, watch Logcat for more details",
-                                  Toast.LENGTH_SHORT)
-                          .show();
-                }
-              }
-            });
+          @Override
+          public void onResponse(Call call, Response response) throws IOException {
+            try {
+              final JSONObject jsonObject = new JSONObject(response.body().string());
+              display_and_save_genres(jsonObject, profileTextView);
+            } catch (JSONException e) {
+              Log.d("JSON", "Failed to parse data: " + e);
+              Toast.makeText(
+                      MainMenu.this,
+                      "Failed to parse data, watch Logcat for more details",
+                      Toast.LENGTH_SHORT)
+                  .show();
+            }
+          }
+        });
   }
 
   public void spotifyRequest_playlist(String url_parameter) {
@@ -895,41 +947,41 @@ public class MainMenu extends AppCompatActivity {
 
     // Create a request to get the user profile
     final Request request =
-            new Request.Builder()
-                    .url(url_parameter)
-                    .addHeader("Authorization", "Bearer " + mAccessToken)
-                    .build();
+        new Request.Builder()
+            .url(url_parameter)
+            .addHeader("Authorization", "Bearer " + mAccessToken)
+            .build();
 
     cancelCall();
     mCall = mOkHttpClient.newCall(request);
 
     mCall.enqueue(
-            new Callback() {
-              @Override
-              public void onFailure(Call call, IOException e) {
-                Log.d("HTTP", "Failed to fetch data: " + e);
-                Toast.makeText(
-                                MainMenu.this,
-                                "Failed to fetch data, watch Logcat for more details",
-                                Toast.LENGTH_SHORT)
-                        .show();
-              }
+        new Callback() {
+          @Override
+          public void onFailure(Call call, IOException e) {
+            Log.d("HTTP", "Failed to fetch data: " + e);
+            Toast.makeText(
+                    MainMenu.this,
+                    "Failed to fetch data, watch Logcat for more details",
+                    Toast.LENGTH_SHORT)
+                .show();
+          }
 
-              @Override
-              public void onResponse(Call call, Response response) throws IOException {
-                try {
-                  final JSONObject jsonObject = new JSONObject(response.body().string());
-                  save_playlist(jsonObject, profileTextView);
-                } catch (JSONException e) {
-                  Log.d("JSON", "Failed to parse data: " + e);
-                  Toast.makeText(
-                                  MainMenu.this,
-                                  "Failed to parse data, watch Logcat for more details",
-                                  Toast.LENGTH_SHORT)
-                          .show();
-                }
-              }
-            });
+          @Override
+          public void onResponse(Call call, Response response) throws IOException {
+            try {
+              final JSONObject jsonObject = new JSONObject(response.body().string());
+              save_playlist(jsonObject, profileTextView);
+            } catch (JSONException e) {
+              Log.d("JSON", "Failed to parse data: " + e);
+              Toast.makeText(
+                      MainMenu.this,
+                      "Failed to parse data, watch Logcat for more details",
+                      Toast.LENGTH_SHORT)
+                  .show();
+            }
+          }
+        });
   }
 
   /** Get user profile This method will get the user profile using the token */
@@ -940,14 +992,14 @@ public class MainMenu extends AppCompatActivity {
 
   public void onGetUserMostListenSongs(String timeFrame) {
     String url =
-            "https://api.spotify.com/v1/me/top/tracks?time_range=" + timeFrame + "&limit=5&offset=0";
+        "https://api.spotify.com/v1/me/top/tracks?time_range=" + timeFrame + "&limit=5&offset=0";
     spotifyRequest_song(url);
   }
 
   public void onGetUserMostListenArtists(String timeFrame) {
 
     String url =
-            "https://api.spotify.com/v1/me/top/artists?time_range=" + timeFrame + "&limit=5&offset=0";
+        "https://api.spotify.com/v1/me/top/artists?time_range=" + timeFrame + "&limit=5&offset=0";
     spotifyRequest_artist(url);
   }
 
@@ -980,37 +1032,37 @@ public class MainMenu extends AppCompatActivity {
   private void spotifyRequest_playlist_songs(String playlistId) {
     String url_tracks = "https://api.spotify.com/v1/playlists/" + playlistId + "/tracks";
     Request request =
-            new Request.Builder()
-                    .url(url_tracks)
-                    .addHeader("Authorization", "Bearer " + mAccessToken)
-                    .build();
+        new Request.Builder()
+            .url(url_tracks)
+            .addHeader("Authorization", "Bearer " + mAccessToken)
+            .build();
 
     mCall = mOkHttpClient.newCall(request);
     mCall.enqueue(
-            new Callback() {
-              @Override
-              public void onFailure(Call call, IOException e) {
-                Log.d("HTTP", "Failed to fetch tracks: " + e);
-              }
+        new Callback() {
+          @Override
+          public void onFailure(Call call, IOException e) {
+            Log.d("HTTP", "Failed to fetch tracks: " + e);
+          }
 
-              @Override
-              public void onResponse(Call call, Response response) throws IOException {
-                try {
-                  final JSONObject jsonObject = new JSONObject(response.body().string());
-                  save_songs_from_playlist(jsonObject, playlistId);
+          @Override
+          public void onResponse(Call call, Response response) throws IOException {
+            try {
+              final JSONObject jsonObject = new JSONObject(response.body().string());
+              save_songs_from_playlist(jsonObject, playlistId);
 
-                } catch (JSONException e) {
-                  Log.d("JSON", "Failed to parse data: " + e);
-                  runOnUiThread(
-                          () ->
-                                  Toast.makeText(
-                                                  MainMenu.this,
-                                                  "Failed to parse data, watch Logcat for more details",
-                                                  Toast.LENGTH_SHORT)
-                                          .show());
-                }
-              }
-            });
+            } catch (JSONException e) {
+              Log.d("JSON", "Failed to parse data: " + e);
+              runOnUiThread(
+                  () ->
+                      Toast.makeText(
+                              MainMenu.this,
+                              "Failed to parse data, watch Logcat for more details",
+                              Toast.LENGTH_SHORT)
+                          .show());
+            }
+          }
+        });
   }
 
   private void play_game() throws InterruptedException {
@@ -1041,11 +1093,11 @@ public class MainMenu extends AppCompatActivity {
     }
     // print the song, the playlist and the other 2 playlists
     String txt =
-            "Song: "
-                    + randomSong
-                    + "(Original Playlist: "
-                    + randomPlaylist
-                    + ")\nChoose the playlist: ";
+        "Song: "
+            + randomSong
+            + "(Original Playlist: "
+            + randomPlaylist
+            + ")\nChoose the playlist: ";
     // Print 3 playlists, randomize in which order the original playlist is shown
     // It can either be the first, second or third
     int randomOrder = rand.nextInt(3);
@@ -1121,7 +1173,7 @@ public class MainMenu extends AppCompatActivity {
 
     // We believe these 5 songs are of your liking
     SpannableString boldText =
-            new SpannableString("We believe these 5 songs are of your liking\n\n");
+        new SpannableString("We believe these 5 songs are of your liking\n\n");
     // make "We believe these 5 songs are of your liking"bigger
     boldText.setSpan(new RelativeSizeSpan(2f), 0, boldText.length(), 0);
     builder.append(boldText);
@@ -1149,7 +1201,7 @@ public class MainMenu extends AppCompatActivity {
 
     // We believe these 5 songs are of your liking
     SpannableString boldText =
-            new SpannableString("We believe these 5 artists are of your liking\n\n");
+        new SpannableString("We believe these 5 artists are of your liking\n\n");
     // make "We believe these 5 songs are of your liking"bigger
     boldText.setSpan(new RelativeSizeSpan(2f), 0, boldText.length(), 0);
     builder.append(boldText);
@@ -1215,10 +1267,10 @@ public class MainMenu extends AppCompatActivity {
     } catch (JSONException e) {
       Log.d("JSON", "Failed to parse data: " + e);
       Toast.makeText(
-                      MainMenu.this,
-                      "Failed to parse data, watch Logcat for more details",
-                      Toast.LENGTH_SHORT)
-              .show();
+              MainMenu.this,
+              "Failed to parse data, watch Logcat for more details",
+              Toast.LENGTH_SHORT)
+          .show();
     }
     playlist_songs.put(playlistId, songs);
   }
@@ -1231,13 +1283,13 @@ public class MainMenu extends AppCompatActivity {
    */
   private AuthorizationRequest getAuthenticationRequest(AuthorizationResponse.Type type) {
     return new AuthorizationRequest.Builder(CLIENT_ID, type, getRedirectUri().toString())
-            .setShowDialog(false)
-            .setScopes(
-                    new String[] {
-                            "user-read-email", "user-top-read"
-                    }) // <--- Change the scope of your requested token here
-            .setCampaign("your-campaign-token")
-            .build();
+        .setShowDialog(false)
+        .setScopes(
+            new String[] {
+              "user-read-email", "user-top-read"
+            }) // <--- Change the scope of your requested token here
+        .setCampaign("your-campaign-token")
+        .build();
   }
 
   /**
