@@ -26,6 +26,7 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -34,6 +35,7 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.spotify.sdk.android.auth.AuthorizationClient;
 import com.spotify.sdk.android.auth.AuthorizationRequest;
 import com.spotify.sdk.android.auth.AuthorizationResponse;
+import com.spotify.sdk.android.auth.LoginActivity;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -51,6 +53,8 @@ import okhttp3.Callback;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
+
+import androidx.fragment.app.Fragment;
 
 public class MainMenu extends AppCompatActivity {
 
@@ -80,102 +84,66 @@ public class MainMenu extends AppCompatActivity {
 
   private TextView tokenTextView, codeTextView, profileTextView;
 
-  private FirebaseAuth mAuth;
+  public FirebaseAuth mAuth;
+
+  private BottomNavigationView.OnNavigationItemSelectedListener navListener =
+      new BottomNavigationView.OnNavigationItemSelectedListener() {
+        @Override
+        public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+          Fragment selectedFragment = null;
+
+          int id = item.getItemId();
+          if (id == R.id.nav_wrapped) {
+            selectedFragment = new WrappedFragment();
+          } else if (id == R.id.nav_games) {
+            selectedFragment = new GamesFragment();
+          } else if (id == R.id.nav_profile) {
+            selectedFragment = new ProfileFragment();
+          }
+
+          if (selectedFragment != null) {
+            getSupportFragmentManager()
+                .beginTransaction()
+                .replace(R.id.fragment_container, selectedFragment)
+                .commit();
+            return true;
+          }
+
+          return false;
+        }
+      };
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
-
     setContentView(R.layout.main_menu);
-
     mAuth = FirebaseAuth.getInstance();
 
-    // Default to false if the extra is not present
-    boolean justSignedIn = getIntent().getBooleanExtra("justSignedIn", false);
-    if (!justSignedIn) {
-      greet_user();
-      // Show your modal or Toast here
+    BottomNavigationView bottomNav = findViewById(R.id.bottom_navigation);
+    bottomNav.setOnNavigationItemSelectedListener(navListener);
+
+    if (savedInstanceState == null) {
+      getSupportFragmentManager()
+          .beginTransaction()
+          .replace(R.id.fragment_container, new WrappedFragment())
+          .commit();
     }
+    // Token and code handling
+    handleTokenAndCode();
+  }
 
-    // Initialize the views
-    tokenTextView = (TextView) findViewById(R.id.token_text_view);
-    // codeTextView = (TextView) findViewById(R.id.code_text_view);
-    profileTextView = (TextView) findViewById(R.id.response_text_view);
+  // Handle token and code retrieval
+  private void handleTokenAndCode() {
+    if (mAccessToken == null || mAccessToken.isEmpty()) {
+      getToken();
+    }
+  }
 
-    // Initialize the buttons
-    Button tokenBtn = (Button) findViewById(R.id.token_btn);
-    // Button codeBtn = (Button) findViewById(R.id.code_btn);
-    Button profileBtn = (Button) findViewById(R.id.profile_btn);
-    Button gameBtn = (Button) findViewById(R.id.game_btn);
-    Button wrappedBtn = (Button) findViewById(R.id.wrapped_btn);
-    Button recommendationsBtn = (Button) findViewById(R.id.artist_recom_btn);
-    previousWrappedBtn = (Button) findViewById(R.id.previous_wrapped_btn);
-    Button modifyBtn = (Button) findViewById(R.id.modify_btn);
-    Button logOutBtn = (Button) findViewById(R.id.logout_btn);
-    Button game2Btn = (Button) findViewById(R.id.game2_btn);
-
-    // Set the click listeners for the buttons
-
-    tokenBtn.setOnClickListener(
-        (v) -> {
-          getToken();
-        });
-
-    /*codeBtn.setOnClickListener(
-    (v) -> {
-      getCode();
-    });*/
-
-    profileBtn.setOnClickListener(
-        (v) -> {
-          getRecommendations();
-        });
-
-    gameBtn.setOnClickListener(
-        (v) -> {
-          try {
-            Toast.makeText(this, "Playing game, this may take a while", Toast.LENGTH_SHORT).show();
-            play_game();
-          } catch (InterruptedException e) {
-            e.printStackTrace();
-          }
-        });
-
-    recommendationsBtn.setOnClickListener(
-        (v) -> {
-          getArtistRecommendations();
-        });
-
-    wrappedBtn.setOnClickListener(
-        new View.OnClickListener() {
-          @Override
-          public void onClick(View v) {
-            showPopupMenu(v);
-          }
-        });
-
-    previousWrappedBtn.setOnClickListener(
-        (v) -> {
-          getPreviousWrappeds();
-        });
-
-    modifyBtn.setOnClickListener(
-        (v) -> {
-          Intent intent = new Intent(MainMenu.this, ModifyUser.class);
-          startActivity(intent);
-        });
-
-    logOutBtn.setOnClickListener(
-        (v) -> {
-          mAuth.signOut();
-          Intent intent = new Intent(MainMenu.this, StartupScreen.class);
-          startActivity(intent);
-        });
-
-    game2Btn.setOnClickListener(
-        (v) -> {
-          playgame2();
-        });
+  private void setupButtonListeners() {
+    Button logOutBtn = findViewById(R.id.logout_btn);
+    if (logOutBtn != null) {
+      logOutBtn.setOnClickListener(v -> logoutUser());
+    }
   }
 
   @Override
@@ -191,8 +159,9 @@ public class MainMenu extends AppCompatActivity {
     }
   }
 
-  private void playgame2() {
-    // Select a random song from the top 5 songs and strip 4 random characters from the song name
+  public void playgame2() {
+    // Select a random song from the top 5 songs and strip 4 random characters from
+    // the song name
     // The user has to guess the song name
     if (top5Songs.size() == 0) {
       Toast.makeText(this, "You need to generate a wrapped first!", Toast.LENGTH_SHORT).show();
@@ -212,13 +181,13 @@ public class MainMenu extends AppCompatActivity {
     // TODO: Add interface to allow the user to input their guess
   }
 
-  private void getPreviousWrappeds() {
+  public void getPreviousWrappeds() {
     Intent intent = new Intent(MainMenu.this, PreviousWrappedSelectScreen.class);
 
     startActivity(intent);
   }
 
-  private void generateWrapped(TextView textView, String timeFrame) {
+  public void generateWrapped(TextView textView, String timeFrame) {
     System.out.println("Generating Wrapped");
     onGetUserMostListenArtists(timeFrame);
     try {
@@ -410,8 +379,13 @@ public class MainMenu extends AppCompatActivity {
    * is token? https://developer.spotify.com/documentation/general/guides/authorization-guide/
    */
   public void getToken() {
+    if (mAccessToken != null && !mAccessToken.isEmpty()) {
+      Log.d("SpotifyAuth", "Already have an access token");
+      return;
+    }
+    Log.d("SpotifyAuth", "Requesting new access token...");
     final AuthorizationRequest request = getAuthenticationRequest(AuthorizationResponse.Type.TOKEN);
-    AuthorizationClient.openLoginActivity(MainMenu.this, AUTH_TOKEN_REQUEST_CODE, request);
+    AuthorizationClient.openLoginActivity(this, AUTH_TOKEN_REQUEST_CODE, request);
   }
 
   /**
@@ -449,15 +423,15 @@ public class MainMenu extends AppCompatActivity {
     super.onActivityResult(requestCode, resultCode, data);
     final AuthorizationResponse response = AuthorizationClient.getResponse(resultCode, data);
 
-    // Check which request code is present (if any)
-    if (AUTH_TOKEN_REQUEST_CODE == requestCode) {
-      mAccessToken = response.getAccessToken();
-      System.out.println("Access token: " + mAccessToken);
-      setTextAsync("You succesfully logged in!", tokenTextView);
-
-    } else if (AUTH_CODE_REQUEST_CODE == requestCode) {
-      mAccessCode = response.getCode();
-      setTextAsync("You succesfully retieved the token!", codeTextView);
+    switch (requestCode) {
+      case AUTH_TOKEN_REQUEST_CODE:
+        if (response.getType() == AuthorizationResponse.Type.TOKEN) {
+          mAccessToken = response.getAccessToken();
+          Log.d("SpotifyAuth", "Access token received: " + mAccessToken);
+          // Save this token in SharedPreferences or another persistent storage
+        }
+        break;
+        // Handle other cases if needed
     }
   }
 
@@ -467,7 +441,8 @@ public class MainMenu extends AppCompatActivity {
       JSONArray items = (JSONArray) json_value.get("items");
 
       for (int i = 0; i < items.length(); i++) {
-        // Suponiendo que top_artists es un JSONObject y 'items' es un JSONArray dentro de él
+        // Suponiendo que top_artists es un JSONObject y 'items' es un JSONArray dentro
+        // de él
 
         // i es tu índice en el bucle o algún valor específico
         JSONObject item = (JSONObject) items.get(i);
@@ -493,7 +468,8 @@ public class MainMenu extends AppCompatActivity {
       JSONArray items = (JSONArray) json_value.get("artists");
 
       for (int i = 0; i < items.length(); i++) {
-        // Suponiendo que top_artists es un JSONObject y 'items' es un JSONArray dentro de él
+        // Suponiendo que top_artists es un JSONObject y 'items' es un JSONArray dentro
+        // de él
 
         // i es tu índice en el bucle o algún valor específico
         JSONObject item = (JSONObject) items.get(i);
@@ -519,7 +495,8 @@ public class MainMenu extends AppCompatActivity {
       JSONArray items = (JSONArray) json_value.get("tracks");
 
       for (int i = 0; i < items.length(); i++) {
-        // Suponiendo que top_artists es un JSONObject y 'items' es un JSONArray dentro de él
+        // Suponiendo que top_artists es un JSONObject y 'items' es un JSONArray dentro
+        // de él
 
         // i es tu índice en el bucle o algún valor específico
         JSONObject item = (JSONObject) items.get(i);
@@ -556,7 +533,8 @@ public class MainMenu extends AppCompatActivity {
       JSONArray items = (JSONArray) json_value.get("items");
 
       for (int i = 0; i < items.length(); i++) {
-        // Suponiendo que top_artists es un JSONObject y 'items' es un JSONArray dentro de él
+        // Suponiendo que top_artists es un JSONObject y 'items' es un JSONArray dentro
+        // de él
 
         // i es tu índice en el bucle o algún valor específico
         JSONObject item = (JSONObject) items.get(i);
@@ -590,7 +568,8 @@ public class MainMenu extends AppCompatActivity {
       JSONArray items = (JSONArray) json_value.get("items");
 
       for (int i = 0; i < items.length(); i++) {
-        // Suponiendo que top_artists es un JSONObject y 'items' es un JSONArray dentro de él
+        // Suponiendo que top_artists es un JSONObject y 'items' es un JSONArray dentro
+        // de él
 
         // i es tu índice en el bucle o algún valor específico
         JSONObject item = (JSONObject) items.get(i);
@@ -1013,7 +992,7 @@ public class MainMenu extends AppCompatActivity {
         });
   }
 
-  private void play_game() throws InterruptedException {
+  public void play_game() throws InterruptedException {
     getPlaylists();
     sleep(2000);
 
@@ -1098,8 +1077,10 @@ public class MainMenu extends AppCompatActivity {
     // Update top5Songs
     top5Songs = text;
 
-    /*String text_str = String.join("\n", text);
-    runOnUiThread(() -> textView.setText(text_str));*/
+    /*
+     * String text_str = String.join("\n", text);
+     * runOnUiThread(() -> textView.setText(text_str));
+     */
   }
 
   private void display_and_save_artist(final JSONObject json, TextView textView) {
@@ -1109,8 +1090,10 @@ public class MainMenu extends AppCompatActivity {
     // Update top5Artists
     top5Artists = text;
 
-    /*String text_str = String.join("\n", text);
-    runOnUiThread(() -> textView.setText(text_str));*/
+    /*
+     * String text_str = String.join("\n", text);
+     * runOnUiThread(() -> textView.setText(text_str));
+     */
   }
 
   private void display_and_save_recommendation(final JSONObject json, TextView textView) {
@@ -1172,25 +1155,27 @@ public class MainMenu extends AppCompatActivity {
 
   private void display_and_save_genres(final JSONObject json, TextView textView) {
     genres = parseGenres(json);
-    /*int total_genres = 0;
-    for (Map.Entry<String, Integer> entry : genres.entrySet()) {
-      total_genres += entry.getValue();
-    }
-    String text_str = "Total genres: " + total_genres + "\n" + "Top 5 genres:\n";
-    // Add top 5 genres to text_str
-    int i = 0;
-    for (Map.Entry<String, Integer> entry : genres.entrySet()) {
-      text_str += entry.getKey();
-      if (i < 4) {
-        text_str += "\n";
-      } else {
-        break;
-      }
-      i++;
-    }
-
-    String finalText_str = text_str;
-    runOnUiThread(() -> textView.setText(finalText_str));*/
+    /*
+     * int total_genres = 0;
+     * for (Map.Entry<String, Integer> entry : genres.entrySet()) {
+     * total_genres += entry.getValue();
+     * }
+     * String text_str = "Total genres: " + total_genres + "\n" + "Top 5 genres:\n";
+     * // Add top 5 genres to text_str
+     * int i = 0;
+     * for (Map.Entry<String, Integer> entry : genres.entrySet()) {
+     * text_str += entry.getKey();
+     * if (i < 4) {
+     * text_str += "\n";
+     * } else {
+     * break;
+     * }
+     * i++;
+     * }
+     *
+     * String finalText_str = text_str;
+     * runOnUiThread(() -> textView.setText(finalText_str));
+     */
   }
 
   private void save_playlist(final JSONObject json, TextView textView) {
@@ -1203,7 +1188,8 @@ public class MainMenu extends AppCompatActivity {
       JSONArray items = (JSONArray) json.get("items");
 
       for (int i = 0; i < items.length(); i++) {
-        // Suponiendo que top_artists es un JSONObject y 'items' es un JSONArray dentro de él
+        // Suponiendo que top_artists es un JSONObject y 'items' es un JSONArray dentro
+        // de él
 
         // i es tu índice en el bucle o algún valor específico
         JSONObject item = (JSONObject) items.get(i);
@@ -1259,5 +1245,20 @@ public class MainMenu extends AppCompatActivity {
   protected void onDestroy() {
     cancelCall();
     super.onDestroy();
+  }
+
+  private void redirectToLoginScreen() {
+    Intent intent = new Intent(this, LoginActivity.class);
+    intent.addFlags(
+        Intent.FLAG_ACTIVITY_CLEAR_TOP
+            | Intent.FLAG_ACTIVITY_NEW_TASK
+            | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+    startActivity(intent);
+    finish();
+  }
+
+  public void logoutUser() {
+    mAuth.signOut();
+    redirectToLoginScreen();
   }
 }

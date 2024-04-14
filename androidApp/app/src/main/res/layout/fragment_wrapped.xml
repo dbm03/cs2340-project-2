@@ -1,0 +1,24 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp">
+
+    <Button
+        android:id="@+id/spotify_sign_in_btn"
+        android:layout_width="370dp"
+        android:layout_height="wrap_content"
+        android:text="Sign in with Spotify" />
+
+    <Button
+        android:id="@+id/wrapped_btn"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Generate Wrapped" />
+
+    <Button
+        android:id="@+id/previous_wrapped_btn"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Show Previous Wrappeds" />
+</LinearLayout>
