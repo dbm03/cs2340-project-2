@@ -82,10 +82,17 @@ public class WrappedScreen extends AppCompatActivity {
     subtitle.setSpan(new RelativeSizeSpan(2f), 0, subtitle.length(), 0);
     // make it orange
     subtitle.setSpan(
+<<<<<<< HEAD
             new android.text.style.ForegroundColorSpan(Color.rgb(255, 255, 255)),
             0,
             subtitle.length(),
             0);
+=======
+        new android.text.style.ForegroundColorSpan(Color.rgb(255, 255, 255)),
+        0,
+        subtitle.length(),
+        0);
+>>>>>>> 42af02a86de8bf9489bb085bf7ee321cda2b9bb3
     buildSubtitle.append(subtitle);
     wrappedSubtitle.setText(subtitle);
 
@@ -100,7 +107,11 @@ public class WrappedScreen extends AppCompatActivity {
     subtitle.setSpan(new RelativeSizeSpan(2f), 0, subtitle.length(), 0);
     // make it red
     subtitle.setSpan(
+<<<<<<< HEAD
             new android.text.style.ForegroundColorSpan(Color.WHITE), 0, subtitle.length(), 0);
+=======
+        new android.text.style.ForegroundColorSpan(Color.WHITE), 0, subtitle.length(), 0);
+>>>>>>> 42af02a86de8bf9489bb085bf7ee321cda2b9bb3
     buildSubtitle.append(subtitle);
     wrappedSubtitle2.setText(subtitle);
 
@@ -115,7 +126,11 @@ public class WrappedScreen extends AppCompatActivity {
     subtitle.setSpan(new RelativeSizeSpan(2f), 0, subtitle.length(), 0);
     // make it blue
     subtitle.setSpan(
+<<<<<<< HEAD
             new android.text.style.ForegroundColorSpan(Color.WHITE), 0, subtitle.length(), 0);
+=======
+        new android.text.style.ForegroundColorSpan(Color.WHITE), 0, subtitle.length(), 0);
+>>>>>>> 42af02a86de8bf9489bb085bf7ee321cda2b9bb3
     buildSubtitle.append(subtitle);
     wrappedSubtitle3.setText(subtitle);
 
@@ -125,7 +140,10 @@ public class WrappedScreen extends AppCompatActivity {
             new android.text.style.StyleSpan(android.graphics.Typeface.BOLD), 0, number.length(), 0);
     number.setSpan(new RelativeSizeSpan(3f), 0, number.length(), 0);
     wrappedNumber.setText(number);
+<<<<<<< HEAD
 
+=======
+>>>>>>> 42af02a86de8bf9489bb085bf7ee321cda2b9bb3
 
     // Subtitle Top 5 Genres:
     subtitle = new SpannableString("Top 5 Genres\n");
@@ -134,7 +152,11 @@ public class WrappedScreen extends AppCompatActivity {
     subtitle.setSpan(new RelativeSizeSpan(2f), 0, subtitle.length(), 0);
     // make it green
     subtitle.setSpan(
+<<<<<<< HEAD
             new android.text.style.ForegroundColorSpan(Color.WHITE), 0, subtitle.length(), 0);
+=======
+        new android.text.style.ForegroundColorSpan(Color.WHITE), 0, subtitle.length(), 0);
+>>>>>>> 42af02a86de8bf9489bb085bf7ee321cda2b9bb3
     buildSubtitle.append(subtitle);
     wrappedSubtitle4.setText(subtitle);
 
