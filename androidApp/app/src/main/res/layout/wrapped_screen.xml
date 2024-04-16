@@ -10,11 +10,7 @@
         android:id="@+id/wrappedTitle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-<<<<<<< HEAD
-        android:background="?attr/colorPrimary"
-=======
         android:background="?attr/cardBackgroundColor"
->>>>>>> 42af02a86de8bf9489bb085bf7ee321cda2b9bb3
         android:text="This is your Spotify Wrapped!"
         android:textAlignment="center"
         android:textSize="50dp" />
@@ -52,13 +48,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="?attr/colorPrimaryContainer"
-<<<<<<< HEAD
-        android:textAlignment="center"
-        android:text="subtitle 3" />
-=======
         android:text="subtitle 3"
         android:textAlignment="center"/>
->>>>>>> 42af02a86de8bf9489bb085bf7ee321cda2b9bb3
 
     <TextView
         android:id="@+id/wrappedNumber"
