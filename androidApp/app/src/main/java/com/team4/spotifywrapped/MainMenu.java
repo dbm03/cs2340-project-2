@@ -1,5 +1,7 @@
 package com.team4.spotifywrapped;
 
+import com.google.android.material.bottomnavigation.BottomNavigationView;
+
 import static java.lang.Thread.sleep;
 import java.time.Instant;
 
@@ -85,8 +87,15 @@ public class MainMenu extends AppCompatActivity {
   @Override
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
-
     setContentView(R.layout.main_menu);
+
+    if (savedInstanceState == null) {
+      getSupportFragmentManager().beginTransaction()
+              .replace(R.id.fragment_container, new WrappedFragment())
+              .commit();
+    }
+
+    setupBottomNavigationView();
 
     mAuth = FirebaseAuth.getInstance();
 
@@ -114,7 +123,6 @@ public class MainMenu extends AppCompatActivity {
     Button logOutBtn = (Button) findViewById(R.id.logout_btn);
     Button game2Btn = (Button) findViewById(R.id.game2_btn);
 
-    // Set the click listeners for the buttons
 
     tokenBtn.setOnClickListener(
             (v) -> {
@@ -176,6 +184,41 @@ public class MainMenu extends AppCompatActivity {
             (v) -> {
               playgame2();
             });
+  }
+
+
+  private void setupBottomNavigationView() {
+    BottomNavigationView navView = findViewById(R.id.bottom_navigation);
+    navView.setOnNavigationItemSelectedListener(item -> {
+      int id = item.getItemId();
+      if (id == R.id.navigation_wrapped) {
+        showWrappedScreen();
+        return true;
+      } else if (id == R.id.navigation_games) {
+        showGamesScreen();
+        return true;
+      } else if (id == R.id.navigation_profile) {
+        showProfileScreen();
+        return true;
+      }
+      return false;
+    });
+  }
+
+  private void showWrappedScreen() {
+    getSupportFragmentManager().beginTransaction()
+            .replace(R.id.fragment_container, new WrappedFragment())
+            .commit();
+  }
+
+  private void showGamesScreen() {
+    // Show Games-related actions
+  }
+
+  private void showProfileScreen() {
+    getSupportFragmentManager().beginTransaction()
+            .replace(R.id.fragment_container, new ProfileFragment())
+            .commit();
   }
 
   @Override

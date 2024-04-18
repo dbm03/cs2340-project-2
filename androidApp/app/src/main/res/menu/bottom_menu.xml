@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/navigation_wrapped"
+        android:title="Wrapped" />
+    <item
+        android:id="@+id/navigation_games"
+        android:title="Games" />
+    <item
+        android:id="@+id/navigation_profile"
+        android:title="Profile" />
+</menu>
