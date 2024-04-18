@@ -1,7 +1,9 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    xmlns:tools="http://schemas.android.com/tools"
+    >
 
     <TextView
         android:id="@+id/token_text_view"
@@ -23,18 +25,6 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Generate Wrapped" />
-
-    <Button
-        android:id="@+id/game_btn"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Where is this song from?" />
-
-    <Button
-        android:id="@+id/game2_btn"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Complete the song name" />
 
     <Button
         android:id="@+id/profile_btn"
@@ -61,15 +51,4 @@
         android:textSize="10sp"
         tools:text="Line 1\nLine 2\nLine 3" />
 
-    <Button
-        android:id="@+id/modify_btn"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Edit account" />
-
-    <Button
-        android:id="@+id/logout_btn"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Log out" />
 </LinearLayout>
