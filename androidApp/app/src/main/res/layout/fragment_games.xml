@@ -17,5 +17,11 @@
         android:layout_height="wrap_content"
         android:text="Complete the song name" />
 
+    <TextView
+        android:id="@+id/response_text_view"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="10sp"
+        tools:text="Line 1\nLine 2\nLine 3" />
 
 </LinearLayout>
