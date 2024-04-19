@@ -3,6 +3,7 @@ package com.team4.spotifywrapped;
 import static java.lang.Thread.sleep;
 import java.time.Instant;
 
+import android.app.Activity;
 import android.os.Bundle;
 import android.content.Intent;
 import android.net.Uri;
@@ -56,6 +57,7 @@ import okhttp3.Response;
 
 public class WrappedFragment extends Fragment {
 
+    // public TextView profileTextView;
     public static final String CLIENT_ID = "ab2d3ae0a0ee47a6990b4774ad98c805";
     public static final String REDIRECT_URI = "spotifysdk://auth";
 
@@ -65,21 +67,16 @@ public class WrappedFragment extends Fragment {
     public static final int AUTH_CODE_REQUEST_CODE = 1;
 
     // Variables for Wrapped
-    private ArrayList<String> top5Songs = new ArrayList<>();
     private ArrayList<String> top5Artists = new ArrayList<>();
     private ArrayList<String> top5Songs_id = new ArrayList<>();
     private ArrayList<String> top5Artists_id = new ArrayList<>();
     private Map<String, String> recommendations = new HashMap<>();
     private Map<String, Integer> genres = new HashMap<>();
-    private Map<String, Pair<String, String>> playlists = new HashMap<>();
-    private Map<String, ArrayList<String>> playlist_songs = new HashMap<>();
 
-    private final OkHttpClient mOkHttpClient = new OkHttpClient();
-    private String mAccessToken, mAccessCode;
+    // private String mAccessToken, mAccessCode;
+    public TextView tokenTextView, codeTextView, profileTextView;
+
     private Call mCall;
-
-    private Button previousWrappedBtn;
-    private TextView tokenTextView, codeTextView, profileTextView;
 
     private FirebaseAuth mAuth;
 
@@ -95,15 +92,7 @@ public class WrappedFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-
         mAuth = FirebaseAuth.getInstance();
-
-        Intent intent = getActivity() != null ? getActivity().getIntent() : null;
-        boolean justSignedIn = intent != null && intent.getBooleanExtra("justSignedIn", false);
-
-        if (!justSignedIn) {
-            greet_user();
-        }
 
         TextView tokenTextView = view.findViewById(R.id.token_text_view);
         TextView profileTextView = view.findViewById(R.id.response_text_view);
@@ -156,6 +145,22 @@ public class WrappedFragment extends Fragment {
         }
     }
 
+    private void updateToken(String newToken) {
+        Activity activity = getActivity();
+        if (activity instanceof MainMenu) {
+            ((MainMenu) activity).setAccessToken(newToken);
+        } else {
+            // Handle error or log a warning that the activity is not the expected type
+        }
+    }
+
+    private String getAccessToken() {
+        if (getActivity() instanceof MainMenu) {
+            return ((MainMenu) getActivity()).getAccessToken();
+        }
+        return null;
+    }
+
     private void getPreviousWrappeds() {
         if (getActivity() == null) {
             return;
@@ -188,7 +193,7 @@ public class WrappedFragment extends Fragment {
         }
         System.out.println("Genres done");
 
-        String top5SongsStr = String.join("\n", top5Songs);
+        String top5SongsStr = String.join("\n", ((MainMenu) getActivity()).getTop5Songs());
         String top5ArtistsStr = String.join("\n", top5Artists);
         int total_genres = genres.keySet().size();
 
@@ -324,39 +329,6 @@ public class WrappedFragment extends Fragment {
         }
     }
 
-    protected void greet_user() {
-        FirebaseUser user = mAuth.getCurrentUser();
-        // The user has just signed in, show welcome back message
-        if (user == null) {
-            return;
-        }
-        String userName = user.getDisplayName();
-        if (userName != null && userName.isEmpty()) {
-            userName = user.getEmail();
-        }
-        if (userName == null) userName = "";
-
-        // Check if the context is still valid (fragment is attached)
-        if (getContext() == null) {
-            return; // Fragment is not attached, cannot display an AlertDialog
-        }
-
-        new AlertDialog.Builder(getContext())
-                .setTitle("Welcome Back!")
-                .setMessage("You are signed in as " + userName)
-                .setPositiveButton("Continue", null)
-                .setNegativeButton("Change User", (dialog, which) -> {
-                    // User chooses to change user, sign out and start the sign-in flow again
-                    mAuth.signOut();
-                    if (getActivity() != null) {
-                        Intent intent = new Intent(getActivity(), StartupScreen.class);
-                        getActivity().startActivity(intent);
-                    }
-                })
-                .setIcon(android.R.drawable.ic_dialog_info)
-                .show();
-    }
-
     /**
      * Get token from Spotify. This method will open the Spotify login activity and get the token.
      * What is token? https://developer.spotify.com/documentation/general/guides/authorization-guide/
@@ -385,15 +357,16 @@ public class WrappedFragment extends Fragment {
      */
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
+
         super.onActivityResult(requestCode, resultCode, data);
         final AuthorizationResponse response = AuthorizationClient.getResponse(resultCode, data);
 
         if (AUTH_TOKEN_REQUEST_CODE == requestCode) {
-            mAccessToken = response.getAccessToken();
-            System.out.println("Access token: " + mAccessToken);
+            updateToken(response.getAccessToken());
+            System.out.println("Access token: " + getAccessToken());
             setTextAsync("You successfully logged in!", tokenTextView);
         } else if (AUTH_CODE_REQUEST_CODE == requestCode) {
-            mAccessCode = response.getCode();
+            updateToken(response.getCode());
             setTextAsync("You successfully retrieved the token!", codeTextView);
         }
     }
@@ -523,7 +496,7 @@ public class WrappedFragment extends Fragment {
     }
 
     public void spotifyRequest_song(String url_parameter) {
-        if (mAccessToken == null) {
+        if (getAccessToken() == null) {
             if (getContext() != null) {
                 Toast.makeText(getContext(), "You need to get an access token first!", Toast.LENGTH_SHORT).show();
             }
@@ -534,10 +507,11 @@ public class WrappedFragment extends Fragment {
         final Request request =
                 new Request.Builder()
                         .url(url_parameter)
-                        .addHeader("Authorization", "Bearer " + mAccessToken)
+                        .addHeader("Authorization", "Bearer " + getAccessToken())
                         .build();
 
         cancelCall();
+        OkHttpClient mOkHttpClient = ((MainMenu)getActivity()).getOkHttpClient();
         mCall = mOkHttpClient.newCall(request);
 
         mCall.enqueue(new Callback() {
@@ -573,18 +547,20 @@ public class WrappedFragment extends Fragment {
     }
 
     public void spotifyRequest_artist(String url_parameter) {
-        if (mAccessToken == null) {
+        if (getAccessToken() == null) {
             if (getContext() != null) {
                 Toast.makeText(getContext(), "You need to get an access token first!", Toast.LENGTH_SHORT).show();
             }
             return;
         }
 
+        OkHttpClient mOkHttpClient = ((MainMenu)getActivity()).getOkHttpClient();
+
         // Create a request to get the user profile
         final Request request =
                 new Request.Builder()
                         .url(url_parameter)
-                        .addHeader("Authorization", "Bearer " + mAccessToken)
+                        .addHeader("Authorization", "Bearer " + getAccessToken())
                         .build();
 
         cancelCall();
@@ -616,7 +592,7 @@ public class WrappedFragment extends Fragment {
     }
 
     public void spotifyRequest_recommendation(String url_parameter) {
-        if (mAccessToken == null) {
+        if (getAccessToken() == null) {
             if (getContext() != null) {
                 Toast.makeText(getContext(), "You need to get an access token first!", Toast.LENGTH_SHORT).show();
             }
@@ -627,10 +603,11 @@ public class WrappedFragment extends Fragment {
         final Request request =
                 new Request.Builder()
                         .url(url_parameter)
-                        .addHeader("Authorization", "Bearer " + mAccessToken)
+                        .addHeader("Authorization", "Bearer " + getAccessToken())
                         .build();
 
         cancelCall();
+        OkHttpClient mOkHttpClient = ((MainMenu)getActivity()).getOkHttpClient();
         mCall = mOkHttpClient.newCall(request);
 
         mCall.enqueue(
@@ -659,7 +636,7 @@ public class WrappedFragment extends Fragment {
     }
 
     public void spotifyRequest_artist_recommendation(String url_parameter) {
-        if (mAccessToken == null) {
+        if (getAccessToken() == null) {
             if (getContext() != null) {
                 Toast.makeText(getContext(), "You need to get an access token first!", Toast.LENGTH_SHORT).show();
             }
@@ -670,10 +647,12 @@ public class WrappedFragment extends Fragment {
         final Request request =
                 new Request.Builder()
                         .url(url_parameter)
-                        .addHeader("Authorization", "Bearer " + mAccessToken)
+                        .addHeader("Authorization", "Bearer " + getAccessToken())
                         .build();
 
         cancelCall();
+        OkHttpClient mOkHttpClient = ((MainMenu)getActivity()).getOkHttpClient();
+
         mCall = mOkHttpClient.newCall(request);
 
         mCall.enqueue(
@@ -702,7 +681,7 @@ public class WrappedFragment extends Fragment {
     }
 
     public void spotifyRequest_genres(String url_parameter) {
-        if (mAccessToken == null) {
+        if (getAccessToken() == null) {
             if (getContext() != null) {
                 Toast.makeText(getContext(), "You need to get an access token first!", Toast.LENGTH_SHORT).show();
             }
@@ -713,10 +692,11 @@ public class WrappedFragment extends Fragment {
         final Request request =
                 new Request.Builder()
                         .url(url_parameter)
-                        .addHeader("Authorization", "Bearer " + mAccessToken)
+                        .addHeader("Authorization", "Bearer " + getAccessToken())
                         .build();
 
         cancelCall();
+        OkHttpClient mOkHttpClient = ((MainMenu)getActivity()).getOkHttpClient();
         mCall = mOkHttpClient.newCall(request);
 
         mCall.enqueue(
@@ -803,7 +783,7 @@ public class WrappedFragment extends Fragment {
         top5Songs_id = parseObjects(json, "id");
         ArrayList<String> text = parseObjects(json, "name");
         // Update top5Songs
-        top5Songs = text;
+        ((MainMenu) getActivity()).setTop5Songs(text);
 
     /*String text_str = String.join("\n", text);
     runOnUiThread(() -> textView.setText(text_str));*/

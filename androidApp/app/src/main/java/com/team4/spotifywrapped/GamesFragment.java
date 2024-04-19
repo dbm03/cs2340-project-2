@@ -34,10 +34,21 @@ import java.util.Random;
 
 import okhttp3.Call;
 import okhttp3.Callback;
+import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
 
 public class GamesFragment extends Fragment {
+
+    private Map<String, Pair<String, String>> playlists = new HashMap<>();
+    private Map<String, ArrayList<String>> playlist_songs = new HashMap<>();
+    private Button previousWrappedBtn;
+
+    private Call mCall;
+
+    private FirebaseAuth mAuth;
+
+    private TextView profileTextView;
 
     @Nullable
     @Override
@@ -52,28 +63,40 @@ public class GamesFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
+        TextView profileTextView = view.findViewById(R.id.response_text_view);
+
+        mAuth = FirebaseAuth.getInstance();
+
         Button gameBtn = view.findViewById(R.id.game_btn);
         Button game2Btn = view.findViewById(R.id.game2_btn);
 
         gameBtn.setOnClickListener(v -> {
             try {
-                Toast.makeText(getContext(), "Playing game, this may take a while", Toast.LENGTH_SHORT).show();
-                play_game();
+                if (getAccessToken() != null) {
+                    Toast.makeText(getContext(), "Playing game, this may take a while", Toast.LENGTH_SHORT).show();
+                    play_game();
+                } else {
+                    Toast.makeText(getContext(), "Access Token not available", Toast.LENGTH_SHORT).show();
+                }
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
         });
 
         game2Btn.setOnClickListener(v -> {
-            //playgame2();
+            playgame2();
         });
 
     }
 
+    private String getAccessToken() {
+        if (getActivity() instanceof MainMenu) {
+            return ((MainMenu) getActivity()).getAccessToken();
+        }
+        return null;
+    }
 
     private void play_game() throws InterruptedException {
-    }
-        /*
         getPlaylists();
         sleep(2000);
 
@@ -141,7 +164,8 @@ public class GamesFragment extends Fragment {
     }
 
     public void spotifyRequest_playlist(String url_parameter) {
-        if (mAccessToken == null) {
+
+        if (getAccessToken() == null) {
             if (getContext() != null) {
                 Toast.makeText(getContext(), "You need to get an access token first!", Toast.LENGTH_SHORT).show();
             }
@@ -152,10 +176,11 @@ public class GamesFragment extends Fragment {
         final Request request =
                 new Request.Builder()
                         .url(url_parameter)
-                        .addHeader("Authorization", "Bearer " + mAccessToken)
+                        .addHeader("Authorization", "Bearer " + getAccessToken())
                         .build();
 
         cancelCall();
+        OkHttpClient mOkHttpClient = ((MainMenu)getActivity()).getOkHttpClient();
         mCall = mOkHttpClient.newCall(request);
 
         mCall.enqueue(
@@ -183,14 +208,14 @@ public class GamesFragment extends Fragment {
                 });
     }
 
-    // Get user profile This method will get the user profile using the token
+    /** Get user profile This method will get the user profile using the token */
     public void onGetUserProfileClicked() {
         String url = "https://api.spotify.com/v1/me";
         spotifyRequest(url);
     }
 
     public void spotifyRequest(String url_parameter) {
-        if (mAccessToken == null) {
+        if (getAccessToken() == null) {
             if (getContext() != null) {
                 Toast.makeText(getContext(), "You need to get an access token first!", Toast.LENGTH_SHORT).show();
             }
@@ -201,10 +226,11 @@ public class GamesFragment extends Fragment {
         final Request request =
                 new Request.Builder()
                         .url(url_parameter)
-                        .addHeader("Authorization", "Bearer " + mAccessToken)
+                        .addHeader("Authorization", "Bearer " + getAccessToken())
                         .build();
 
         cancelCall();
+        OkHttpClient mOkHttpClient = ((MainMenu)getActivity()).getOkHttpClient();
         mCall = mOkHttpClient.newCall(request);
 
         mCall.enqueue(new Callback() {
@@ -245,6 +271,9 @@ public class GamesFragment extends Fragment {
     private void playgame2() {
         // Select a random song from the top 5 songs and strip 4 random characters from the song name
         // The user has to guess the song name
+
+        ArrayList<String> top5Songs = ((MainMenu) getActivity()).getTop5Songs();
+
         if (top5Songs.size() == 0) {
             Toast.makeText(getContext(), "You need to generate a wrapped first!", Toast.LENGTH_SHORT).show();
             return;
@@ -268,9 +297,10 @@ public class GamesFragment extends Fragment {
         Request request =
                 new Request.Builder()
                         .url(url_tracks)
-                        .addHeader("Authorization", "Bearer " + mAccessToken)
+                        .addHeader("Authorization", "Bearer " + getAccessToken())
                         .build();
 
+        OkHttpClient mOkHttpClient = ((MainMenu)getActivity()).getOkHttpClient();
         mCall = mOkHttpClient.newCall(request);
         mCall.enqueue(
                 new Callback() {
@@ -387,5 +417,14 @@ public class GamesFragment extends Fragment {
 
         return hash_vals;
     }
-    */
+
+    private void cancelCall() {
+        if (mCall != null) {
+            mCall.cancel();
+        }
+    }
+
+    private void setTextAsync(final String text, TextView textView) {
+        getActivity().runOnUiThread(() -> textView.setText(text));
+    }
 }
