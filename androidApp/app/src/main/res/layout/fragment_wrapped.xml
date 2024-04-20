@@ -27,7 +27,7 @@
         android:text="Generate Wrapped" />
 
     <Button
-        android:id="@+id/profile_btn"
+        android:id="@+id/song_recommendations"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Get Song Recommendations" />

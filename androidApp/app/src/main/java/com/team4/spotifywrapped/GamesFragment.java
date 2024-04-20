@@ -2,6 +2,7 @@ package com.team4.spotifywrapped;
 
 import static java.lang.Thread.sleep;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
@@ -63,7 +64,7 @@ public class GamesFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        TextView profileTextView = view.findViewById(R.id.response_text_view);
+        profileTextView = view.findViewById(R.id.game_text_view);
 
         mAuth = FirebaseAuth.getInstance();
 
@@ -72,7 +73,7 @@ public class GamesFragment extends Fragment {
 
         gameBtn.setOnClickListener(v -> {
             try {
-                if (getAccessToken() != null) {
+                if (getLocalToken() != null) {
                     Toast.makeText(getContext(), "Playing game, this may take a while", Toast.LENGTH_SHORT).show();
                     play_game();
                 } else {
@@ -89,11 +90,9 @@ public class GamesFragment extends Fragment {
 
     }
 
-    private String getAccessToken() {
-        if (getActivity() instanceof MainMenu) {
-            return ((MainMenu) getActivity()).getAccessToken();
-        }
-        return null;
+    private String getLocalToken() {
+        Activity activity = getActivity();
+        return ((MainMenu) activity).getTokenAccess();
     }
 
     private void play_game() throws InterruptedException {
@@ -106,6 +105,11 @@ public class GamesFragment extends Fragment {
             spotifyRequest_playlist_songs(entry.getValue().first);
         }
         sleep(3000);
+
+        if (playlists.isEmpty()) {
+            return; // Exit if there are no playlists to avoid Random exception
+        }
+
         // Choose a random playlist and a random song from that playlist
         Random rand = new Random();
         int randomPlaylistIndex = rand.nextInt(playlists.size());
@@ -160,12 +164,13 @@ public class GamesFragment extends Fragment {
 
     public void getPlaylists() {
         String url = "https://api.spotify.com/v1/me/playlists";
+        Log.d("GameFragment1", "Fetching for Playlists...: ");
         spotifyRequest_playlist(url);
     }
 
     public void spotifyRequest_playlist(String url_parameter) {
 
-        if (getAccessToken() == null) {
+        if (getLocalToken() == null) {
             if (getContext() != null) {
                 Toast.makeText(getContext(), "You need to get an access token first!", Toast.LENGTH_SHORT).show();
             }
@@ -176,8 +181,11 @@ public class GamesFragment extends Fragment {
         final Request request =
                 new Request.Builder()
                         .url(url_parameter)
-                        .addHeader("Authorization", "Bearer " + getAccessToken())
+                        .addHeader("Authorization", "Bearer " + getLocalToken())
                         .build();
+
+        Log.d("GameFragment1", "request: " + request);
+
 
         cancelCall();
         OkHttpClient mOkHttpClient = ((MainMenu)getActivity()).getOkHttpClient();
@@ -197,6 +205,7 @@ public class GamesFragment extends Fragment {
                     public void onResponse(Call call, Response response) throws IOException {
                         try {
                             final JSONObject jsonObject = new JSONObject(response.body().string());
+                            Log.d("GameFragment1", "Your Playlist: " + jsonObject);
                             save_playlist(jsonObject, profileTextView);
                         } catch (JSONException e) {
                             Log.d("JSON", "Failed to parse data: " + e);
@@ -215,7 +224,7 @@ public class GamesFragment extends Fragment {
     }
 
     public void spotifyRequest(String url_parameter) {
-        if (getAccessToken() == null) {
+        if (getLocalToken() == null) {
             if (getContext() != null) {
                 Toast.makeText(getContext(), "You need to get an access token first!", Toast.LENGTH_SHORT).show();
             }
@@ -226,7 +235,7 @@ public class GamesFragment extends Fragment {
         final Request request =
                 new Request.Builder()
                         .url(url_parameter)
-                        .addHeader("Authorization", "Bearer " + getAccessToken())
+                        .addHeader("Authorization", "Bearer " + getLocalToken())
                         .build();
 
         cancelCall();
@@ -248,8 +257,9 @@ public class GamesFragment extends Fragment {
                     Log.d("HTTP", "Server returned error: " + response);
                     return;
                 }
+                final String responseBody = response.body().string(); // Call string once
                 try {
-                    final JSONObject jsonObject = new JSONObject(response.body().string());
+                    final JSONObject jsonObject = new JSONObject(responseBody);
                     setTextAsync(jsonObject.toString(3), profileTextView);
                     String email = jsonObject.optString("email", "");
                     String id = jsonObject.optString("id", "");
@@ -293,12 +303,16 @@ public class GamesFragment extends Fragment {
     }
 
     private void spotifyRequest_playlist_songs(String playlistId) {
+
         String url_tracks = "https://api.spotify.com/v1/playlists/" + playlistId + "/tracks";
+        Log.d("GameFragment1", "url_tracks: " + url_tracks);
         Request request =
                 new Request.Builder()
                         .url(url_tracks)
-                        .addHeader("Authorization", "Bearer " + getAccessToken())
+                        .addHeader("Authorization", "Bearer " + getLocalToken())
                         .build();
+        Log.d("GameFragment1", "request: " + request);
+
 
         OkHttpClient mOkHttpClient = ((MainMenu)getActivity()).getOkHttpClient();
         mCall = mOkHttpClient.newCall(request);
@@ -311,8 +325,16 @@ public class GamesFragment extends Fragment {
 
                     @Override
                     public void onResponse(Call call, Response response) throws IOException {
+
+                        if (!response.isSuccessful()) {
+                            Log.e("HTTP", "Server returned an error: " + response.code());
+                            return;
+                        }
+
+                        final String responseBody = response.body().string();
+                        Log.d("GameFragment1", "responseBody: " + responseBody);
                         try {
-                            final JSONObject jsonObject = new JSONObject(response.body().string());
+                            final JSONObject jsonObject = new JSONObject(responseBody);
                             save_songs_from_playlist(jsonObject, playlistId);
 
                         } catch (JSONException e) {
