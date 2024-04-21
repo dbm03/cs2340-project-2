@@ -92,6 +92,8 @@ public class WrappedFragment extends Fragment {
     private ArrayList<String> top5Artists_id = new ArrayList<>();
     private Map<String, String> recommendations = new HashMap<>();
     private Map<String, Integer> genres = new HashMap<>();
+    private ArrayList<WrappedScreen2> songs_wrapped = new ArrayList<>();
+    private ArrayList<WrappedScreen3> artists_wrapped = new ArrayList<>();
 
 
     // UI elements
@@ -303,28 +305,21 @@ public class WrappedFragment extends Fragment {
             i++;
         }
 
-        String finalText_str =
-                "Top 5 Songs: "
-                        + top5SongsStr
-                        + "\nTop 5 Artists: "
-                        + top5ArtistsStr
-                        + "\nTotal Genres: "
-                        + total_genres
-                        + "\nTop 5 Genres: "
-                        + top5GenresStr;
-
         FirebaseFirestore db = FirebaseFirestore.getInstance();
 
         long now = Instant.now().toEpochMilli();
 
         Map<String, Object> wrappedData = new HashMap<>();
-        wrappedData.put("top5Songs", top5SongsStr);
-        wrappedData.put("top5Artists", top5ArtistsStr);
+        wrappedData.put("top5Songs", songs_wrapped);
+        wrappedData.put("top5Artists", artists_wrapped);
         wrappedData.put("totalGenres", (String.valueOf(total_genres)));
         wrappedData.put("top5Genres", top5GenresStr);
         wrappedData.put("epoch", now);
 
         String userUid = mAuth.getUid();
+
+        System.out.println("artists_wrapped: " + artists_wrapped);
+        System.out.println("songs_wrapped: " + songs_wrapped);
 
         if (userUid != null) {
             db.collection("users")
@@ -348,24 +343,24 @@ public class WrappedFragment extends Fragment {
                             });
         }
 
-        redirectToWrapped(top5SongsStr, top5ArtistsStr, (String.valueOf(total_genres)), top5GenresStr);
+        redirectToWrapped(songs_wrapped, artists_wrapped, (String.valueOf(total_genres)), top5GenresStr);
     }
 
     /**
      * Redirects to the Wrapped screen with the specified Wrapped content.
      *
-     * @param top5SongsStr   Top 5 songs as a String
-     * @param top5ArtistsStr Top 5 artists as a String
+     * @param songs_wrapped   Top 5 songs as an ArrayList
+     * @param artists_wrapped Top 5 artists as a ArrayList
      * @param totalGenres    Total number of genres as a String
      * @param top5GenresStr  Top 5 genres as a String
      */
-    private void redirectToWrapped(String top5SongsStr, String top5ArtistsStr, String totalGenres, String top5GenresStr) {
+    private void redirectToWrapped(ArrayList<WrappedScreen2> songs_wrapped, ArrayList<WrappedScreen3> artists_wrapped, String totalGenres, String top5GenresStr) {
         if (getActivity() == null) {
             return;
         }
-        Intent intent = new Intent(getActivity(), WrappedScreen.class);
-        intent.putExtra("top5Songs", top5SongsStr);
-        intent.putExtra("top5Artists", top5ArtistsStr);
+        Intent intent = new Intent(getActivity(), WrappedScreen1.class);
+        intent.putParcelableArrayListExtra("songs_wrapped", songs_wrapped);
+        intent.putParcelableArrayListExtra("artists_wrapped", artists_wrapped);
         intent.putExtra("totalGenres", totalGenres);
         intent.putExtra("top5Genres", top5GenresStr);
 
@@ -444,17 +439,6 @@ public class WrappedFragment extends Fragment {
     }
 
     /**
-     * Get code from Spotify. This method will open the Spotify login activity and get the code.
-     * What is code? <a href="https://developer.spotify.com/documentation/general/guides/authorization-guide/">...</a>
-     */
-    public void getCode() {
-        final AuthorizationRequest request = getAuthenticationRequest(AuthorizationResponse.Type.CODE);
-        if (getActivity() != null) {
-            AuthorizationClient.openLoginActivity(getActivity(), AUTH_CODE_REQUEST_CODE, request);
-        }
-    }
-
-    /**
      * Parses JSON objects and extracts values associated with the specified key.
      *
      * @param json_value The JSON object to parse
@@ -485,76 +469,6 @@ public class WrappedFragment extends Fragment {
         return hash_vals;
     }
 
-    /**
-     * Parses JSON objects containing artist recommendations and extracts artist names.
-     *
-     * @param json_value The JSON object to parse
-     * @return An ArrayList containing the names of recommended artists
-     */
-    public ArrayList<String> parseArtistRecommendations(JSONObject json_value) {
-        ArrayList<String> hash_vals = new ArrayList<>();
-        try {
-            JSONArray items = (JSONArray) json_value.get("artists");
-
-            for (int i = 0; i < items.length(); i++) {
-                JSONObject item = (JSONObject) items.get(i);
-                hash_vals.add(item.getString("name"));
-            }
-
-        } catch (JSONException e) {
-            Log.d("JSON", "Failed to parse data: " + e);
-            Toast.makeText(
-                            getContext(),
-                            "Failed to parse data, watch Logcat for more details",
-                            Toast.LENGTH_SHORT)
-                    .show();
-        }
-
-        return hash_vals;
-    }
-
-    /**
-     * Parses JSON objects containing song recommendations and extracts song names and artists.
-     *
-     * @param json_value The JSON object to parse
-     * @return A Map containing song names as keys and corresponding artist names as values
-     */
-    public Map<String, String> parseRecommendations(JSONObject json_value) {
-        Map<String, String> hash_vals = new HashMap<>();
-        try {
-            JSONArray items = (JSONArray) json_value.get("tracks");
-
-            for (int i = 0; i < items.length(); i++) {
-                // Suponiendo que top_artists es un JSONObject y 'items' es un JSONArray dentro de él
-
-                // i es tu índice en el bucle o algún valor específico
-                JSONObject item = (JSONObject) items.get(i);
-                // Get artists
-                JSONArray artists = item.getJSONArray("artists");
-                String artist = "";
-                for (int j = 0; j < artists.length(); j++) {
-                    JSONObject artist_obj = artists.getJSONObject(j);
-                    artist += artist_obj.getString("name");
-                    if (j < artists.length() - 1) {
-                        artist += ", ";
-                    }
-                }
-                // Now you can safely call get(key) on the JSONObject
-                hash_vals.put(
-                        item.getString("name"), artist); // Use getString to directly get the String value
-            }
-
-        } catch (JSONException e) {
-            Log.d("JSON", "Failed to parse data: " + e);
-            Toast.makeText(
-                            getContext(),
-                            "Failed to parse data, watch Logcat for more details",
-                            Toast.LENGTH_SHORT)
-                    .show();
-        }
-
-        return hash_vals;
-    }
 
     /**
      * Parses JSON objects containing genre information and counts the occurrence of each genre.
@@ -850,7 +764,51 @@ public class WrappedFragment extends Fragment {
         return recommendations;
     }
 
+    private ArrayList<WrappedScreen2> parse_songs_wrapped(JSONObject json) throws JSONException {
+        ArrayList<WrappedScreen2> recommendations = new ArrayList<>();
+        JSONArray tracks = json.getJSONArray("items");
 
+        for (int i = 0; i < tracks.length(); i++) {
+            JSONObject track = tracks.getJSONObject(i);
+
+            // Get song name
+            String name = track.getString("name");
+
+            // Get the image URL from the album object
+            JSONObject album = track.getJSONObject("album");
+            JSONArray images = album.getJSONArray("images");
+            String imageUrl = images.length() > 0 ? images.getJSONObject(0).getString("url") : "";
+
+            // Get artist name - assuming the first artist is the primary artist
+            JSONArray artists = track.getJSONArray("artists");
+            String artistName = artists.length() > 0 ? artists.getJSONObject(0).getString("name") : "Unknown Artist";
+
+            // Optionally, get the genre if it's available
+            String genre = "Unknown Genre"; // Default to "Unknown Genre" if not found
+            if (album.has("genres") && album.getJSONArray("genres").length() > 0) {
+                genre = album.getJSONArray("genres").getString(0);
+            }
+
+            // Create a new SongRecommendation object and add it to the list
+            WrappedScreen2 songRecommendation = new WrappedScreen2(name, imageUrl, artistName, genre);
+            recommendations.add(songRecommendation);
+        }
+        return recommendations;
+    }
+
+    private ArrayList<WrappedScreen3> parse_artists_wrapped(JSONObject json) throws JSONException {
+        ArrayList<WrappedScreen3> recommendations = new ArrayList<>();
+        JSONArray artists = json.getJSONArray("items");
+        for (int i = 0; i < 5; i++) {
+            JSONObject artist = artists.getJSONObject(i);
+            String name = artist.getString("name");
+            String imageUrl = artist.getJSONArray("images").length() > 0 ? artist.getJSONArray("images").getJSONObject(0).getString("url") : "";
+            String genre = artist.getJSONArray("genres").length() > 0 ? artist.getJSONArray("genres").getString(0) : "Unknown genre";
+            int popularity = artist.optInt("popularity", 0);
+            recommendations.add(new WrappedScreen3(name, imageUrl, genre, popularity));
+        }
+        return recommendations;
+    }
     /**
      * Makes a Spotify request to retrieve genre data.
      *
@@ -948,23 +906,6 @@ public class WrappedFragment extends Fragment {
         spotifyRequest_recommendation(url);
     }
 
-    /**
-     * Initiates the process of getting artist recommendations based on the user's top 5 artists.
-     */
-    public void getArtistRecommendations() {
-        if (top5Artists_id.isEmpty()) {
-            if (getContext() != null) {
-                Toast.makeText(getContext(), "You need to get your top 5 artists first!", Toast.LENGTH_SHORT).show();
-            }
-            return;
-        }
-
-        // Take the first artist id
-        String artist_id = top5Artists_id.get(0);
-        String url = "https://api.spotify.com/v1/artists/" + artist_id + "/related-artists";
-        spotifyRequest_artist_recommendation(url);
-    }
-
 
     /**
      * Updates the UI and saves the user's top 5 songs.
@@ -972,15 +913,13 @@ public class WrappedFragment extends Fragment {
      * @param json     The JSON object containing song data
      * @param textView The TextView to display the song data
      */
-    private void display_and_save_song(final JSONObject json, TextView textView) {
+    private void display_and_save_song(final JSONObject json, TextView textView) throws JSONException {
         // Update top5Songs_id
         top5Songs_id = parseObjects(json, "id");
         ArrayList<String> text = parseObjects(json, "name");
         // Update top5Songs
         ((MainMenu) getActivity()).setTop5Songs(text);
-
-    /*String text_str = String.join("\n", text);
-    runOnUiThread(() -> textView.setText(text_str));*/
+        songs_wrapped = parse_songs_wrapped(json);
     }
 
 
@@ -990,91 +929,14 @@ public class WrappedFragment extends Fragment {
      * @param json     The JSON object containing artist data
      * @param textView The TextView to display the artist data
      */
-    private void display_and_save_artist(final JSONObject json, TextView textView) {
+    private void display_and_save_artist(final JSONObject json, TextView textView) throws JSONException {
         // Update top5Artists_id
         top5Artists_id = parseObjects(json, "id");
         ArrayList<String> text = parseObjects(json, "name");
         // Update top5Artists
         top5Artists = text;
-
-    /*String text_str = String.join("\n", text);
-    runOnUiThread(() -> textView.setText(text_str));*/
+        artists_wrapped = parse_artists_wrapped(json);
     }
-
-    /**
-     * Updates the UI and saves the song recommendations.
-     *
-     * @param json     The JSON object containing recommendation data
-     * @param textView The TextView to display the recommendation data
-     */
-    private void display_and_save_recommendation(final JSONObject json, TextView textView) {
-
-        if (getActivity() == null || isDetached()) {
-            return; // Fragment not attached, or its activity is null
-        }
-
-        // Update recommendations
-        recommendations = parseRecommendations(json);
-
-        SpannableStringBuilder builder = new SpannableStringBuilder();
-
-        // We believe these 5 songs are of your liking
-        SpannableString boldText =
-                new SpannableString("We believe these 5 songs are of your liking\n\n");
-        // make "We believe these 5 songs are of your liking"bigger
-        boldText.setSpan(new RelativeSizeSpan(2f), 0, boldText.length(), 0);
-        builder.append(boldText);
-
-        ArrayList<String> text = new ArrayList<>();
-        for (Map.Entry<String, String> entry : recommendations.entrySet()) {
-            text.add("· " + entry.getKey() + " by " + entry.getValue() + "\n");
-        }
-
-        for (String s : text) {
-            SpannableString str = new SpannableString(s + "\n");
-            // make it a bit bigger
-            str.setSpan(new RelativeSizeSpan(1.5f), 0, str.length(), 0);
-            builder.append(str);
-        }
-
-        getActivity().runOnUiThread(() -> textView.setText(builder));
-    }
-
-    /**
-     * Updates the UI and saves the artist recommendations.
-     *
-     * @param json     The JSON object containing artist recommendation data
-     */
-    private void display_and_save_artist_recommendation(final JSONObject json) throws JSONException {
-        ArrayList<ArtistRecommendation> artistRecommendations = new ArrayList<>();
-        JSONArray artists = json.getJSONArray("artists");
-
-        for (int i = 0; i < artists.length(); i++) {
-            JSONObject artist = artists.getJSONObject(i);
-            String name = artist.getString("name");
-            String imageUrl = "";
-            if (artist.getJSONArray("images").length() > 0) {
-                imageUrl = artist.getJSONArray("images").getJSONObject(0).getString("url");
-            }
-
-            String genre = ""; // Default empty if not found
-            int popularity = artist.optInt("popularity", 0); // Using optInt to handle missing popularity
-
-            // Check for genre if provided
-            if (artist.has("genres") && artist.getJSONArray("genres").length() > 0) {
-                genre = artist.getJSONArray("genres").getString(0); // Assuming first genre as primary
-            }
-
-            ArtistRecommendation artistRecommendation = new ArtistRecommendation(name, imageUrl, genre, popularity);
-            artistRecommendations.add(artistRecommendation);
-        }
-
-        // Send data to the activity
-        Intent intent = new Intent(getActivity(), ArtistRecommendationsActivity.class);
-        intent.putParcelableArrayListExtra("artistRecommendations", artistRecommendations);
-        startActivity(intent);
-    }
-
 
     /**
      * Updates the UI and saves the user's top genres.

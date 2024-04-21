@@ -84,8 +84,8 @@ public class PreviousWrappedSelectScreen extends AppCompatActivity
                                             Log.d("Firebase", "Couldn't parse epoch time");
                                             title = "NULL";
                                         }
-                                        String top5Songs = (String) data.get("top5Songs");
-                                        String top5Artists = (String) data.get("top5Artists");
+                                        ArrayList<HashMap> top5Songs = (ArrayList<HashMap>) data.get("top5Songs");
+                                        ArrayList<HashMap> top5Artists = (ArrayList<HashMap>) data.get("top5Artists");
                                         String totalGenres = (String) data.get("totalGenres");
                                         String top5Genres = (String) data.get("top5Genres");
 
@@ -124,8 +124,8 @@ public class PreviousWrappedSelectScreen extends AppCompatActivity
                         Toast.LENGTH_SHORT)
                 .show();
         Map<String, Object> selectedWrapped = firebaseItems.get(position);
-        String top5Songs = (String) selectedWrapped.get("top5Songs");
-        String top5Artists = (String) selectedWrapped.get("top5Artists");
+        ArrayList<HashMap> top5Songs = (ArrayList<HashMap>) selectedWrapped.get("top5Songs");
+        ArrayList<HashMap> top5Artists = (ArrayList<HashMap>) selectedWrapped.get("top5Artists");
         String totalGenres = (String) selectedWrapped.get("totalGenres");
         String top5Genres = (String) selectedWrapped.get("top5Genres");
 
@@ -133,13 +133,47 @@ public class PreviousWrappedSelectScreen extends AppCompatActivity
     }
 
     private void redirectToWrapped(
-            String top5SongsStr, String top5ArtistsStr, String totalGenres, String top5GenresStr) {
-        Intent intent = new Intent(PreviousWrappedSelectScreen.this, WrappedScreen.class);
+            ArrayList<HashMap> top5Songs,
+            ArrayList<HashMap> top5Artists,
+            String totalGenres,
+            String top5Genres) {
+        Intent intent = new Intent(PreviousWrappedSelectScreen.this, WrappedScreen1.class);
         // put the final text string in the intent
-        intent.putExtra("top5Songs", top5SongsStr);
-        intent.putExtra("top5Artists", top5ArtistsStr);
+
+        //top5songs is an array that contains the fields of the object WrappedScreen2
+        //top5artists is an array that contains the fields of the object WrappedScreen3
+        //We need to recreate these objects now, and pass them to the next activity
+
+        ArrayList<WrappedScreen3> artists_wrapped = new ArrayList<>();
+        ArrayList<WrappedScreen2> songs_wrapped = new ArrayList<>();
+
+        //Recreating the WrappedScreen2 objects
+        for (HashMap song : top5Songs) {
+            //Each song looks like {imageUrl=https://i.scdn.co/image/ab67616d0000b273f74a26b9b62a6a98e56a84e3, genre=Unknown Genre, name=Personal, artistName=HRVY}
+            String name = (String) song.get("name");
+            String imageUrl = (String) song.get("imageUrl");
+            String artistName = (String) song.get("artistName");
+            String genre = (String) song.get("genre");
+            songs_wrapped.add(new WrappedScreen2(name, imageUrl, artistName, genre));
+        }
+
+        //Recreating the WrappedScreen3 objects
+        for (HashMap artist : top5Artists) {
+            //Each artist looks like {imageUrl=https://i.scdn.co/image/ab6761610000e5ebe672b5f553298dcdccb0e676, popularity=100, genre=pop, name=Taylor Swift}
+            String name = (String) artist.get("name");
+            String imageUrl = (String) artist.get("imageUrl");
+            String genre = (String) artist.get("genre");
+            Long popularity = (Long) artist.get("popularity");
+            artists_wrapped.add(new WrappedScreen3(name, imageUrl, genre, (int) (long) popularity));
+        }
+
+
+        System.out.println("artists_wrapped: " + artists_wrapped);
+        System.out.println("songs_wrapped: " + songs_wrapped);
+        intent.putParcelableArrayListExtra("songs_wrapped", songs_wrapped);
+        intent.putParcelableArrayListExtra("artists_wrapped", artists_wrapped);
         intent.putExtra("totalGenres", totalGenres);
-        intent.putExtra("top5Genres", top5GenresStr);
+        intent.putExtra("top5Genres", top5Genres);
 
         startActivity(intent);
     }
