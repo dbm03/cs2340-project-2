@@ -10,7 +10,6 @@ import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-
 public class WrappedScreen4 extends AppCompatActivity {
   @Override
   protected void onCreate(Bundle savedInstanceState) {

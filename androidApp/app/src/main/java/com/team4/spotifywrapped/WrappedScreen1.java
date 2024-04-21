@@ -1,6 +1,5 @@
 package com.team4.spotifywrapped;
 
-
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
