@@ -10,8 +10,9 @@
         android:id="@+id/wrappedTitle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="?attr/cardBackgroundColor"
-        android:text="This is your Spotify Wrapped!"
+        android:background="?attr/colorPrimary"
+        android:text="This is your Wrapped!"
+        android:textColor="?attr/colorOnPrimary"
         android:textAlignment="center"
         android:textSize="50dp" />
 
@@ -70,5 +71,14 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="wrapped Genres"/>
+
+    <ImageView
+        android:id="@+id/wave"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:src="@drawable/wave"
+        android:layout_gravity="center"
+        android:layout_weight="1"
+        android:scaleType="fitEnd"/>
 
 </LinearLayout>
