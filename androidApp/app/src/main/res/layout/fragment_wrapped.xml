@@ -2,53 +2,230 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    xmlns:tools="http://schemas.android.com/tools"
-    >
+    android:padding="0dp">
 
-    <TextView
-        android:id="@+id/token_text_view"
+    <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_margin="8dp"
-        tools:text="Token:" />
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:fillViewport="true">
 
-    <Button
-        android:id="@+id/token_btn"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_margin="8dp"
-        android:drawableLeft="@drawable/spotify_icon"
-        android:text="Sign in with Spotify" />
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:padding="24dp">
 
-    <Button
-        android:id="@+id/wrapped_btn"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Generate Wrapped" />
+            <TextView
+                android:id="@+id/greeting_text_view"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:fontFamily="sans-serif-medium"
+                android:textSize="35sp"
+                android:textStyle="bold" />
 
-    <Button
-        android:id="@+id/song_recommendations"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Get Song Recommendations" />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:fontFamily="sans-serif-medium"
+                android:text="Retrieve your Spotify wrapped, discover new songs"
+                android:textSize="13sp" />
 
-    <Button
-        android:id="@+id/artist_recom_btn"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Get Artist Recommendations" />
 
-    <Button
-        android:id="@+id/previous_wrapped_btn"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Show Previous Wrappeds" />
+            <LinearLayout
+                android:id="@+id/token_btn"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="40dp"
+                android:background="@drawable/ripple_effect"
+                android:clickable="true"
+                android:focusable="true"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:padding="16dp"
+                android:stateListAnimator="@animator/lift_on_press">
 
-    <TextView
-        android:id="@+id/response_text_view"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:textSize="10sp"
-        tools:text="Line 1\nLine 2\nLine 3" />
 
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="start"
+                        android:text="Sign in with Spotify"
+                        android:textColor="#FFFFFF"
+                        android:textSize="18sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="start"
+                        android:text="Get your wrapped and recommendations"
+                        android:textColor="#FFFFFF"
+                        android:textSize="12sp" />
+                </LinearLayout>
+
+                <ImageView
+                    android:layout_width="40sp"
+                    android:layout_height="40sp"
+                    android:src="@drawable/logo" /> <!-- Replace with your actual drawable resource name -->
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="170dp"
+                android:layout_marginTop="20dp"
+                android:background="@drawable/ripple_effect"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:padding="16dp"
+                android:stateListAnimator="@animator/lift_on_press">
+
+                <ImageView
+                    android:layout_width="100sp"
+                    android:layout_height="100sp"
+                    android:layout_marginEnd="24dp"
+                    android:src="@drawable/confetti" /> <!-- Replace with your actual drawable resource name -->
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="start"
+                        android:text="Generate Wrapped"
+                        android:textColor="#FFFFFF"
+                        android:textSize="18sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="start"
+                        android:layout_marginTop="5dp"
+                        android:text="Short, Medium and Long Term"
+                        android:textColor="#FFFFFF"
+                        android:textSize="12sp" />
+
+                    <Button
+                        android:id="@+id/wrapped_btn"
+                        android:layout_width="140dp"
+                        android:layout_height="40dp"
+                        android:layout_marginTop="10dp"
+                        android:text="Spotify Wrapped"
+                        android:textColor="#FFFFFF"
+                        android:textSize="12sp"
+                        android:textStyle="bold" />
+
+                </LinearLayout>
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="170dp"
+                android:layout_marginTop="10dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:stateListAnimator="@animator/lift_on_press">
+
+                <LinearLayout
+                    android:id="@+id/song_recommendations"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:background="@drawable/ripple_effect"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:gravity="center"
+                    android:orientation="vertical"
+                    android:padding="16dp">
+
+                    <ImageView
+                        android:layout_width="60dp"
+                        android:layout_height="60dp"
+                        android:src="@drawable/logo"></ImageView>  <!-- Replace with your actual drawable resource name -->
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="18dp"
+                        android:layout_marginTop="8dp"
+                        android:text="Song"
+                        android:textAlignment="center"
+                        android:textSize="14sp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="18dp"
+                        android:text="Recommendations"
+                        android:textAlignment="center"
+                        android:textSize="14sp" />
+                </LinearLayout>
+
+                <Space
+                    android:layout_width="16dp"
+                    android:layout_height="match_parent" />
+
+                <LinearLayout
+                    android:id="@+id/artist_recom_btn"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:background="@drawable/ripple_effect"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:gravity="center"
+                    android:orientation="vertical"
+                    android:padding="16dp">
+
+                    <ImageView
+                        android:layout_width="60dp"
+                        android:layout_height="60dp"
+                        android:src="@drawable/logo"></ImageView>  <!-- Replace with your actual drawable resource name -->
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="18dp"
+                        android:layout_marginTop="8dp"
+                        android:text="Artist"
+                        android:textAlignment="center"
+                        android:textSize="14sp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="18dp"
+                        android:text="Recommendations"
+                        android:textAlignment="center"
+                        android:textSize="14sp" />
+                </LinearLayout>
+            </LinearLayout>
+
+
+            <TextView
+                android:id="@+id/previous_wrapped_btn"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingVertical="10dp"
+                android:layout_gravity="center"
+                android:textAlignment="center"
+                android:background="@drawable/ripple_effect"
+                android:text="Previous Wrapped History"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                />
+
+        </LinearLayout>
+    </ScrollView>
 </LinearLayout>

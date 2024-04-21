@@ -1,15 +1,34 @@
-<?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
+<androidx.cardview.widget.CardView xmlns:card_view="http://schemas.android.com/apk/res-auto"
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="horizontal"
-    android:padding="10dp">
+    android:layout_margin="10dp"
+    android:layout_width="match_parent"
+    card_view:cardCornerRadius="8dp"
+    card_view:cardElevation="4dp">
 
-    <TextView
-        android:id="@+id/previous_wrapped_txt"
-        android:layout_width="wrap_content"
+    <LinearLayout
+        android:gravity="center_vertical"
         android:layout_height="wrap_content"
-        android:textSize="20sp"/>
+        android:layout_width="match_parent"
+        android:orientation="horizontal"
+        android:padding="32dp"
+        android:background="@drawable/ripple_effect">
 
-</LinearLayout>
+        <ImageView
+            android:layout_height="40dp"
+            android:layout_width="40dp"
+            android:src="@drawable/logo" />  <!-- Replace with your actual drawable resource name -->
+
+        <TextView
+            android:gravity="start"
+            android:id="@+id/previous_wrapped_txt"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="20dp"
+            android:layout_weight="1"
+            android:layout_width="0dp"
+            android:text="Your Previous Wrapped History Will Appear Here"
+            android:textColor="#ffffff"
+            android:textSize="16sp" />
+    </LinearLayout>
+
+</androidx.cardview.widget.CardView>

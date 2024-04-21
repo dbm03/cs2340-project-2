@@ -4,13 +4,18 @@ import static java.lang.Thread.sleep;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
+import android.text.Spannable;
+import android.text.SpannableString;
+import android.text.style.ForegroundColorSpan;
 import android.util.Log;
 import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -51,6 +56,9 @@ public class GamesFragment extends Fragment {
 
     private TextView profileTextView;
 
+    private ArrayList<String> bankOfSongs;
+    private String currentSong;
+
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater,
@@ -65,6 +73,15 @@ public class GamesFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
 
         profileTextView = view.findViewById(R.id.game_text_view);
+
+        EditText guessInput = view.findViewById(R.id.guessInput);
+        Button submitGuessBtn = view.findViewById(R.id.submitGuessBtn);
+
+        submitGuessBtn.setOnClickListener(v -> {
+            String userGuess = guessInput.getText().toString();
+            checkGuess(userGuess);
+            guessInput.setText(""); // Clear input after guess
+        });
 
         mAuth = FirebaseAuth.getInstance();
 
@@ -84,10 +101,12 @@ public class GamesFragment extends Fragment {
             }
         });
 
-        game2Btn.setOnClickListener(v -> {
-            playgame2();
+        game2Btn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                initializeGame2();  // This starts the game when the button is clicked
+            }
         });
-
     }
 
     private String getLocalToken() {
@@ -278,28 +297,54 @@ public class GamesFragment extends Fragment {
         });
     }
 
+    private void initializeGame2() {
+        bankOfSongs = new ArrayList<>(((MainMenu) getActivity()).getTop5Songs()); // Ensure this list is retrieved or initialized properly
+        if (!bankOfSongs.isEmpty()) {
+            playgame2();
+        } else {
+            Toast.makeText(getContext(), "Please generate your Wrapped first.", Toast.LENGTH_LONG).show();
+        }
+        playgame2();
+    }
+
     private void playgame2() {
+        if (bankOfSongs.isEmpty()) {
+            Toast.makeText(getContext(), "All songs guessed! Restarting game or generate new Wrapped.", Toast.LENGTH_LONG).show();
+            bankOfSongs = new ArrayList<>(((MainMenu) getActivity()).getTop5Songs());
+            return;
+        }
         // Select a random song from the top 5 songs and strip 4 random characters from the song name
         // The user has to guess the song name
 
-        ArrayList<String> top5Songs = ((MainMenu) getActivity()).getTop5Songs();
+        int randomIndex = new Random().nextInt(bankOfSongs.size());
+        currentSong = bankOfSongs.get(randomIndex);
+        bankOfSongs.remove(randomIndex);  // Remove the guessed song from the list
 
-        if (top5Songs.size() == 0) {
-            Toast.makeText(getContext(), "You need to generate a wrapped first!", Toast.LENGTH_SHORT).show();
-            return;
-        }
-        int randomIndex = (int) (Math.random() * top5Songs.size());
-        String song = top5Songs.get(randomIndex);
-        String song_name = song;
-        for (int i = 0; i < 4; i++) {
-            int randomChar = (int) (Math.random() * song_name.length());
-            song_name = song_name.substring(0, randomChar) + "_" + song_name.substring(randomChar + 1);
-        }
-        // Display the song name with 4 characters stripped in the profileTextView
-        setTextAsync("Guess the song: " + song_name, profileTextView);
+        String displayedSong = obscureSong(currentSong);
+        generateGame2Text("Guess the song\n" + displayedSong, profileTextView);
+    }
 
-        // TODO: Implement a way to check if the user guessed the song correctly
-        // TODO: Add interface to allow the user to input their guess
+    private String obscureSong(String song) {
+        String displayedSong = song;
+        int count = 0; // Counter to track the number of replacements
+        while (count < 4) {
+            int randomCharIndex = (int) (Math.random() * displayedSong.length());
+            // Ensure the selected character is not a whitespace
+            if (displayedSong.charAt(randomCharIndex) != ' ') {
+                displayedSong = displayedSong.substring(0, randomCharIndex) + "_" + displayedSong.substring(randomCharIndex + 1);
+                count++;
+            }
+        }
+        return displayedSong;
+    }
+
+    public void checkGuess(String guess) {
+        if (guess.equalsIgnoreCase(currentSong)) {
+            Toast.makeText(getContext(), "Correct!", Toast.LENGTH_SHORT).show();
+            playgame2();
+        } else {
+            Toast.makeText(getContext(), "Incorrect! Try again!", Toast.LENGTH_SHORT).show();
+        }
     }
 
     private void spotifyRequest_playlist_songs(String playlistId) {
@@ -448,5 +493,21 @@ public class GamesFragment extends Fragment {
 
     private void setTextAsync(final String text, TextView textView) {
         getActivity().runOnUiThread(() -> textView.setText(text));
+    }
+
+    private void generateGame2Text(final String text, TextView textView) {
+        if (getActivity() == null) return;
+
+        getActivity().runOnUiThread(() -> {
+            SpannableString spannable = new SpannableString(text);
+            int start = text.indexOf('\n') + 1;
+            int end = text.length();
+
+            if (start != -1 && start < end) {
+                spannable.setSpan(new ForegroundColorSpan(Color.parseColor("#1DB954")), start, end, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+            }
+
+            textView.setText(spannable);
+        });
     }
 }

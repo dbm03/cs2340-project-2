@@ -6,6 +6,7 @@ import android.app.Activity;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.text.SpannableString;
 import android.text.SpannableStringBuilder;
 import android.text.style.RelativeSizeSpan;
@@ -14,6 +15,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.PopupMenu;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -92,7 +94,6 @@ public class WrappedFragment extends Fragment {
     private Map<String, Integer> genres = new HashMap<>();
 
 
-
     // UI elements
     public TextView tokenTextView, codeTextView, profileTextView;
     private Call mCall;
@@ -131,13 +132,26 @@ public class WrappedFragment extends Fragment {
 
         mAuth = FirebaseAuth.getInstance();
 
-        Button tokenBtn = view.findViewById(R.id.token_btn);
-        Button songRecommendationBtn = view.findViewById(R.id.song_recommendations);
+        LinearLayout tokenBtn = view.findViewById(R.id.token_btn);
+        LinearLayout songRecommendationBtn = view.findViewById(R.id.song_recommendations);
         Button wrappedBtn = view.findViewById(R.id.wrapped_btn);
-        Button recommendationsBtn = view.findViewById(R.id.artist_recom_btn);
-        Button previousWrappedBtn = view.findViewById(R.id.previous_wrapped_btn);
-        profileTextView = (TextView) view.findViewById(R.id.response_text_view);
+        LinearLayout recommendationsBtn = view.findViewById(R.id.artist_recom_btn);
+        TextView previousWrappedBtn = view.findViewById(R.id.previous_wrapped_btn);
 
+        TextView greetingTextView = view.findViewById(R.id.greeting_text_view);
+
+        FirebaseUser currentUser = mAuth.getCurrentUser();
+        if (currentUser != null) {
+            String displayName = currentUser.getDisplayName();
+            if (displayName != null && !displayName.isEmpty()) {
+                String firstName = displayName.split(" ")[0];
+                greetingTextView.setText(String.format("Welcome, %s", firstName));
+            } else {
+                greetingTextView.setText("Welcome!");
+            }
+        } else {
+            greetingTextView.setText("Welcome!");
+        }
 
         tokenBtn.setOnClickListener(
                 (v) -> getToken());
@@ -146,10 +160,10 @@ public class WrappedFragment extends Fragment {
                 v -> showPopupMenu(v));
 
         songRecommendationBtn.setOnClickListener(
-                (v) -> getSongRecommendations());
+                (v) -> showSongRecommendations());
 
         recommendationsBtn.setOnClickListener(
-                (v) -> getArtistRecommendations());
+                (v) -> showArtistRecommendations());
 
         previousWrappedBtn.setOnClickListener(
                 (v) -> getPreviousWrappeds());
@@ -193,6 +207,41 @@ public class WrappedFragment extends Fragment {
         }
         Intent intent = new Intent(getActivity(), PreviousWrappedSelectScreen.class);
         startActivity(intent);
+    }
+
+    /**
+     * Redirects to the screen displaying recommended songs.
+     */
+    private void showSongRecommendations() {
+        if (top5Songs_id.isEmpty()) {
+            if (getContext() != null) {
+                Toast.makeText(getContext(), "You need to get your top 5 songs first!", Toast.LENGTH_SHORT).show();
+            }
+            return;
+        }
+
+        if (getActivity() == null) {
+            return;
+        }
+
+        getSongRecommendations();
+    }
+
+    /**
+     * Redirects to the screen displaying recommended artists.
+     */
+    public void showArtistRecommendations() {
+        if (getActivity() == null) {
+            return;
+        }
+        if (top5Artists_id.isEmpty()) {
+            Toast.makeText(getContext(), "You need to get your top 5 artists first!", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        String artist_id = top5Artists_id.get(0); // Or use all your artist IDs
+        String url = "https://api.spotify.com/v1/artists/" + artist_id + "/related-artists";
+        spotifyRequest_artist_recommendation(url);
     }
 
 
@@ -305,10 +354,10 @@ public class WrappedFragment extends Fragment {
     /**
      * Redirects to the Wrapped screen with the specified Wrapped content.
      *
-     * @param top5SongsStr    Top 5 songs as a String
-     * @param top5ArtistsStr  Top 5 artists as a String
-     * @param totalGenres     Total number of genres as a String
-     * @param top5GenresStr   Top 5 genres as a String
+     * @param top5SongsStr   Top 5 songs as a String
+     * @param top5ArtistsStr Top 5 artists as a String
+     * @param totalGenres    Total number of genres as a String
+     * @param top5GenresStr  Top 5 genres as a String
      */
     private void redirectToWrapped(String top5SongsStr, String top5ArtistsStr, String totalGenres, String top5GenresStr) {
         if (getActivity() == null) {
@@ -660,50 +709,93 @@ public class WrappedFragment extends Fragment {
      */
     public void spotifyRequest_recommendation(String url_parameter) {
         if (getLocalToken() == null) {
-            if (getContext() != null) {
-                Toast.makeText(getContext(), "You need to get an access token first!", Toast.LENGTH_SHORT).show();
-            }
+            Toast.makeText(getContext(), "You need to get an access token first!", Toast.LENGTH_SHORT).show();
             return;
         }
 
-        // Create a request to get the user profile
-        final Request request =
-                new Request.Builder()
-                        .url(url_parameter)
-                        .addHeader("Authorization", "Bearer " + getLocalToken())
-                        .build();
-        Log.d("Song", "Request:" + request);
-        cancelCall();
+        final Request request = new Request.Builder()
+                .url(url_parameter)
+                .addHeader("Authorization", "Bearer " + getLocalToken())
+                .build();
+
         OkHttpClient mOkHttpClient = ((MainMenu) getActivity()).getOkHttpClient();
-        Log.d("Song", "mOkHttpClient:" + mOkHttpClient);
         mCall = mOkHttpClient.newCall(request);
-        Log.d("Song", "mCall:" + mCall);
 
-        mCall.enqueue(
-                new Callback() {
-                    @Override
-                    public void onFailure(Call call, IOException e) {
-                        Log.d("HTTP", "Failed to fetch data: " + e);
-                        if (getContext() != null) {
-                            Toast.makeText(getContext(), "Failed to fetch data, watch Logcat for more details", Toast.LENGTH_SHORT).show();
-                        }
-                    }
-
-                    @Override
-                    public void onResponse(Call call, Response response) throws IOException {
-                        try {
-                            final JSONObject jsonObject = new JSONObject(response.body().string());
-                            Log.d("Song", "jsonObject: " + jsonObject);
-                            display_and_save_recommendation(jsonObject, profileTextView);
-                        } catch (JSONException e) {
-                            Log.d("JSON", "Failed to parse data: " + e);
-                            if (getContext() != null) {
-                                Toast.makeText(getContext(), "Failed to fetch data, watch Logcat for more details", Toast.LENGTH_SHORT).show();
-                            }
-                        }
-                    }
+        mCall.enqueue(new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+                // Use getActivity() and runOnUiThread to show the Toast on the UI thread
+                getActivity().runOnUiThread(() -> {
+                    Toast.makeText(getContext(), "Failed to fetch data, watch Logcat for more details", Toast.LENGTH_SHORT).show();
                 });
+            }
+
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+                final String responseData = response.body().string();  // Store response data for logging
+                if (!response.isSuccessful()) {
+                    getActivity().runOnUiThread(() -> {
+                        Toast.makeText(getContext(), "Server returned an error", Toast.LENGTH_SHORT).show();
+                    });
+                    Log.e("HTTP", "Server Error: " + response.code() + " " + responseData);
+                    return;
+                }
+                try {
+                    final JSONObject jsonObject = new JSONObject(responseData);
+                    getActivity().runOnUiThread(() -> {
+                        try {
+                            parseAndDisplayRecommendations(jsonObject);
+                        } catch (JSONException e) {
+                            Toast.makeText(getContext(), "Failed to parse data, watch Logcat for more details", Toast.LENGTH_SHORT).show();
+                            Log.e("JSON", "Parsing error", e);
+                        }
+                    });
+                } catch (JSONException e) {
+                    getActivity().runOnUiThread(() -> {
+                        Toast.makeText(getContext(), "Failed to parse data, watch Logcat for more details", Toast.LENGTH_SHORT).show();
+                    });
+                    Log.e("JSON", "Parsing error on initial parse", e);
+                }
+            }
+        });
     }
+
+    private void parseAndDisplayRecommendations(JSONObject json) throws JSONException {
+        ArrayList<SongRecommendation> recommendations = new ArrayList<>();
+        JSONArray tracks = json.getJSONArray("tracks");
+
+        for (int i = 0; i < tracks.length(); i++) {
+            JSONObject track = tracks.getJSONObject(i);
+
+            // Get song name
+            String name = track.getString("name");
+
+            // Get the image URL from the album object
+            JSONObject album = track.getJSONObject("album");
+            JSONArray images = album.getJSONArray("images");
+            String imageUrl = images.length() > 0 ? images.getJSONObject(0).getString("url") : "";
+
+            // Get artist name - assuming the first artist is the primary artist
+            JSONArray artists = track.getJSONArray("artists");
+            String artistName = artists.length() > 0 ? artists.getJSONObject(0).getString("name") : "Unknown Artist";
+
+            // Optionally, get the genre if it's available
+            String genre = "Unknown Genre"; // Default to "Unknown Genre" if not found
+            if (album.has("genres") && album.getJSONArray("genres").length() > 0) {
+                genre = album.getJSONArray("genres").getString(0);
+            }
+
+            // Create a new SongRecommendation object and add it to the list
+            SongRecommendation songRecommendation = new SongRecommendation(name, imageUrl, artistName, genre);
+            recommendations.add(songRecommendation);
+        }
+
+        // Intent to start SongRecommendationsActivity with the recommendations list
+        Intent intent = new Intent(getActivity(), SongRecommendationsActivity.class);
+        intent.putParcelableArrayListExtra("recommendations", recommendations);
+        startActivity(intent);
+    }
+
 
     /**
      * Makes a Spotify request to retrieve artist recommendations.
@@ -712,48 +804,57 @@ public class WrappedFragment extends Fragment {
      */
     public void spotifyRequest_artist_recommendation(String url_parameter) {
         if (getLocalToken() == null) {
-            if (getContext() != null) {
-                Toast.makeText(getContext(), "You need to get an access token first!", Toast.LENGTH_SHORT).show();
-            }
+            Toast.makeText(getContext(), "You need to get an access token first!", Toast.LENGTH_SHORT).show();
             return;
         }
 
-        // Create a request to get the user profile
-        final Request request =
-                new Request.Builder()
-                        .url(url_parameter)
-                        .addHeader("Authorization", "Bearer " + getLocalToken())
-                        .build();
-
-        cancelCall();
+        Request request = new Request.Builder()
+                .url(url_parameter)
+                .addHeader("Authorization", "Bearer " + getLocalToken())
+                .build();
         OkHttpClient mOkHttpClient = ((MainMenu) getActivity()).getOkHttpClient();
-
         mCall = mOkHttpClient.newCall(request);
 
-        mCall.enqueue(
-                new Callback() {
-                    @Override
-                    public void onFailure(Call call, IOException e) {
-                        Log.d("HTTP", "Failed to fetch data: " + e);
-                        if (getContext() != null) {
-                            Toast.makeText(getContext(), "Failed to fetch data, watch Logcat for more details", Toast.LENGTH_SHORT).show();
-                        }
-                    }
+        mCall.enqueue(new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+                Log.e("HTTP", "Failed to fetch data: " + e);
+                getActivity().runOnUiThread(() -> Toast.makeText(getContext(), "Failed to fetch data, watch Logcat for more details", Toast.LENGTH_SHORT).show());
+            }
 
-                    @Override
-                    public void onResponse(Call call, Response response) throws IOException {
-                        try {
-                            final JSONObject jsonObject = new JSONObject(response.body().string());
-                            display_and_save_artist_recommendation(jsonObject, profileTextView);
-                        } catch (JSONException e) {
-                            Log.d("JSON", "Failed to parse data: " + e);
-                            if (getContext() != null) {
-                                Toast.makeText(getContext(), "Failed to fetch data, watch Logcat for more details", Toast.LENGTH_SHORT).show();
-                            }
-                        }
-                    }
-                });
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+                if (!response.isSuccessful()) {
+                    getActivity().runOnUiThread(() -> Toast.makeText(getContext(), "Server returned an error", Toast.LENGTH_SHORT).show());
+                    return;
+                }
+                try {
+                    JSONObject jsonObject = new JSONObject(response.body().string());
+                    ArrayList<ArtistRecommendation> recommendations = parseArtists(jsonObject);
+                    Intent intent = new Intent(getActivity(), ArtistRecommendationsActivity.class);
+                    intent.putParcelableArrayListExtra("artistRecommendations", recommendations);
+                    startActivity(intent);
+                } catch (JSONException | IOException e) {
+                    Log.e("JSON", "Parsing error on initial parse", e);
+                }
+            }
+        });
     }
+
+    private ArrayList<ArtistRecommendation> parseArtists(JSONObject json) throws JSONException {
+        ArrayList<ArtistRecommendation> recommendations = new ArrayList<>();
+        JSONArray artists = json.getJSONArray("artists");
+        for (int i = 0; i < artists.length(); i++) {
+            JSONObject artist = artists.getJSONObject(i);
+            String name = artist.getString("name");
+            String imageUrl = artist.getJSONArray("images").length() > 0 ? artist.getJSONArray("images").getJSONObject(0).getString("url") : "";
+            String genre = artist.getJSONArray("genres").length() > 0 ? artist.getJSONArray("genres").getString(0) : "Unknown genre";
+            int popularity = artist.optInt("popularity", 0);
+            recommendations.add(new ArtistRecommendation(name, imageUrl, genre, popularity));
+        }
+        return recommendations;
+    }
+
 
     /**
      * Makes a Spotify request to retrieve genre data.
@@ -841,18 +942,13 @@ public class WrappedFragment extends Fragment {
      * Initiates the process of getting song recommendations based on the user's top 5 songs.
      */
     public void getSongRecommendations() {
-        Log.d("Song", "Top 5 Songs:" + top5Songs_id);
         if (top5Songs_id.isEmpty()) {
-            if (getContext() != null) {
-                Toast.makeText(getContext(), "You need to get your top 5 songs first!", Toast.LENGTH_SHORT).show();
-            }
+            Toast.makeText(getContext(), "You need to get your top 5 songs first!", Toast.LENGTH_SHORT).show();
             return;
         }
 
         String song_ids = String.join("%2C", top5Songs_id);
-        Log.d("Song", "Top 5 Songs Ids:" + song_ids);
         String url = "https://api.spotify.com/v1/recommendations?&limit=5&seed_tracks=" + song_ids;
-        Log.d("Song", "url:" + url);
         spotifyRequest_recommendation(url);
     }
 
@@ -866,6 +962,7 @@ public class WrappedFragment extends Fragment {
             }
             return;
         }
+
         // Take the first artist id
         String artist_id = top5Artists_id.get(0);
         String url = "https://api.spotify.com/v1/artists/" + artist_id + "/related-artists";
@@ -951,36 +1048,37 @@ public class WrappedFragment extends Fragment {
      * Updates the UI and saves the artist recommendations.
      *
      * @param json     The JSON object containing artist recommendation data
-     * @param textView The TextView to display the artist recommendation data
      */
-    private void display_and_save_artist_recommendation(final JSONObject json, TextView textView) {
-        // Update recommendations
-        ArrayList<String> text = parseArtistRecommendations(json);
+    private void display_and_save_artist_recommendation(final JSONObject json) throws JSONException {
+        ArrayList<ArtistRecommendation> artistRecommendations = new ArrayList<>();
+        JSONArray artists = json.getJSONArray("artists");
 
-        SpannableStringBuilder builder = new SpannableStringBuilder();
-
-        // We believe these 5 songs are of your liking
-        SpannableString boldText =
-                new SpannableString("We believe these 5 artists are of your liking\n\n");
-        // make "We believe these 5 songs are of your liking"bigger
-        boldText.setSpan(new RelativeSizeSpan(2f), 0, boldText.length(), 0);
-        builder.append(boldText);
-
-        // Get the first 5 artists
-        int i = 0;
-        for (String s : text) {
-            if (i >= 5) {
-                break;
+        for (int i = 0; i < artists.length(); i++) {
+            JSONObject artist = artists.getJSONObject(i);
+            String name = artist.getString("name");
+            String imageUrl = "";
+            if (artist.getJSONArray("images").length() > 0) {
+                imageUrl = artist.getJSONArray("images").getJSONObject(0).getString("url");
             }
-            SpannableString str = new SpannableString("· " + s + "\n");
-            // make it a bit bigger
-            str.setSpan(new RelativeSizeSpan(1.5f), 0, str.length(), 0);
-            builder.append(str);
-            i++;
+
+            String genre = ""; // Default empty if not found
+            int popularity = artist.optInt("popularity", 0); // Using optInt to handle missing popularity
+
+            // Check for genre if provided
+            if (artist.has("genres") && artist.getJSONArray("genres").length() > 0) {
+                genre = artist.getJSONArray("genres").getString(0); // Assuming first genre as primary
+            }
+
+            ArtistRecommendation artistRecommendation = new ArtistRecommendation(name, imageUrl, genre, popularity);
+            artistRecommendations.add(artistRecommendation);
         }
 
-        getActivity().runOnUiThread(() -> textView.setText(builder));
+        // Send data to the activity
+        Intent intent = new Intent(getActivity(), ArtistRecommendationsActivity.class);
+        intent.putParcelableArrayListExtra("artistRecommendations", artistRecommendations);
+        startActivity(intent);
     }
+
 
     /**
      * Updates the UI and saves the user's top genres.

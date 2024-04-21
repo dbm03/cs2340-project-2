@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.firebase.auth.FirebaseAuth;
@@ -132,7 +133,12 @@ public class MainMenu extends AppCompatActivity {
         if (WrappedFragment.AUTH_TOKEN_REQUEST_CODE == requestCode) {
             mAccessToken = response.getAccessToken();
             Log.d("WrappedFragment", "Access token received: " + response.getAccessToken());
-            setTextAsync("You successfully logged in!", findViewById(R.id.token_text_view));
+            Toast.makeText(
+                    MainMenu.this,
+                    "Login Successfully!",
+                    Toast.LENGTH_SHORT
+            ).show();
+
         } else if (WrappedFragment.AUTH_CODE_REQUEST_CODE == requestCode) {
             mAccessToken = response.getCode();
         }
