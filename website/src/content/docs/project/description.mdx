@@ -1,0 +1,99 @@
+---
+title: Project description
+description: Spotify Wrapped project description
+---
+
+## Features
+
+- Wrapped Generation: The app is capable of generating a list similar to Spotify Wrapped with the users top 5 songs, artists, and genres. Users can choose to generate a wrapped based upon a specific timeframe.
+
+- Viewing Previous Wraps: Users can view wraps that they have previously generated within the app.
+
+- Recommendations: The app can provide the user with artist and song recommendations based upon their music tastes.
+
+- Games: The app contains two music related games the user can play.
+
+
+### Technical features
+
+{/* <Icon name="seti:firebase" color="goldenrod" /> */}
+
+<Steps>
+
+1. Implemented Firebase database so the app can be signed into from different devices.
+
+2. Contains a CI/CD pipeline allowing for verification that code is built and formatted correctly. Branches that fail CI/CD runs are not allowed to merge into the main on Github.
+
+3. Premade templates for PRs and issues are available for Github.
+
+</Steps>
+
+## Team presentation
+
+import { Card, CardGrid, Steps, Icon } from '@astrojs/starlight/components';
+
+This is the team that worked on the project and their contributions
+
+<CardGrid stagger>
+	<Card title="Ismael Zhu Zhou" icon="star">
+		As Scrum Master, Ismael guided the team and set goals. He primarily contributed to development of the app's backend and documented the project's requirements
+	</Card>
+	<Card title="David Barroso Murcia" icon="add-document">
+		As Product Owner, David defined and prioritized project requirements and ensured they aligned with the client's needs. He primarily contributed to the app's backend and documentation
+	</Card>
+	<Card title="Hans Ibarra" icon="setting">
+		Hans primarily contributed to the development of the frontend and documentation for the project
+	</Card>
+	<Card title="Eduardo Rodríguez Sánchez" icon="open-book">
+		As the technical support, Eduardo addressed issues that presented themself in the project's development. He primarily contributed to the project's backend and documentation
+	</Card>
+	<Card title="Emilio Hermosa Schiantarelli" icon="open-book">
+		In his role as technical support, Emilio addressed issues that arose during the project's development phase, primarily focusing on backend tasks and documentation
+	</Card>
+	<Card title="Chris Kyslinger" icon="open-book">
+		Chris primarily contributed to the development of the frontend and documentation for the project
+	</Card>
+</CardGrid>
+
+## Design process
+
+### Scrum Methodology
+
+Our team used SCRUM in our approach to product management beginning with the creation of a comprehensive plan outlining the user stories we aimed to accomplish. These user stories served as the backbone of our development efforts and ensured that we remained focused and were able to achieve established goals.
+
+To maintain transparency and alignment with our client's (TA) expectations, we followed weekly sprints. At the start of each sprint, we performed Sprint planning, in which we held a meeting to discuss what would be accomplished. At the end of a sprint, a review was held in which we would present completed work to the client for feedback. From this, we were able to adjust needs that may have been missed and ensure the product met the client's expectations.
+
+In terms of task management and coordination within our team, we leveraged GitHub's project management features. We were able to streamline our workflow by tracking tasks within GitHub. This approach facilitated effective collaboration and allowed for us to meet deadlines.
+
+Trello was also used for the product backlog. For each sprint, a new Trello board was created with to-do, in progress, review, and done columns to track the status of different tasks.
+
+Additionally, we utilized WhatsApp as a supplementary communication channel for more immediate discussions. This platform allowed us to quickly address urgent matters and seek clarification on certain tasks.
+
+Overall, our approach to project management encompassed planning, regular client engagement, transparent task management through GitHub and Trello and efficient communication via WhatsApp. These practices enabled us to navigate the complexities of the development process effectively, and to deliver a final product that met the client's expectations.
+
+### Design
+
+The app follows the Model-View-Controller (MVC) design pattern.
+
+This pattern was beneficial for multiple reasons:
+
+<Steps>
+
+1. This pattern allowed for the application to broken into components for modular development.
+
+2. Components could be reused across the application, leading to faster development and fewer bugs.
+
+3. Since the view is separated from the model and controller, it was possible to have multiple views for the same data.
+
+</Steps>
+
+## Video Demonstration
+
+{/* ToDo */}
+
+import YouTube from "../../../components/YouTube.astro"
+
+<YouTube
+  title="Spotify Wrapped Clone"
+  videoId="k97UKnY3_Tg"
+/>
