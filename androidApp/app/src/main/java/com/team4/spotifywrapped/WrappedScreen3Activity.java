@@ -23,7 +23,8 @@ public class WrappedScreen3Activity extends AppCompatActivity {
 
     recyclerView = findViewById(R.id.artist_recommendations_recyclerview);
     recyclerView.setLayoutManager(new LinearLayoutManager(this));
-    artistRecommendations = new ArrayList<>(); // Initialize the list to avoid null pointer exceptions.
+    artistRecommendations =
+        new ArrayList<>(); // Initialize the list to avoid null pointer exceptions.
 
     adapter = new WrappedScreen3Adapter(this, artistRecommendations);
     recyclerView.setAdapter(adapter);
@@ -36,26 +37,27 @@ public class WrappedScreen3Activity extends AppCompatActivity {
     String totalGenres = intent.getStringExtra("totalGenres");
     String top5Genres = intent.getStringExtra("top5Genres");
 
-    nextButton.setOnClickListener(
-        (v) -> nextwrappedscreen(totalGenres, top5Genres));
+    nextButton.setOnClickListener((v) -> nextwrappedscreen(totalGenres, top5Genres));
   }
 
   private void loadArtistRecommendations() {
     Intent intent = getIntent();
-    ArrayList<WrappedScreen3> recommendations = intent.getParcelableArrayListExtra("artists_wrapped");
+    ArrayList<WrappedScreen3> recommendations =
+        intent.getParcelableArrayListExtra("artists_wrapped");
     if (recommendations != null && !recommendations.isEmpty()) {
       artistRecommendations.addAll(recommendations);
       adapter.notifyDataSetChanged();
     } else {
-      Log.e("ArtistRecs", "No artist recommendations were passed to the activity or they were empty");
+      Log.e(
+          "ArtistRecs", "No artist recommendations were passed to the activity or they were empty");
       // Optionally show a message or handle the empty case
     }
   }
 
-    private void nextwrappedscreen(String totalGenres, String top5Genres) {
-        Intent intent = new Intent(this, WrappedScreen4.class);
-        intent.putExtra("totalGenres", totalGenres);
-        intent.putExtra("top5Genres", top5Genres);
-        startActivity(intent);
-    }
+  private void nextwrappedscreen(String totalGenres, String top5Genres) {
+    Intent intent = new Intent(this, WrappedScreen4.class);
+    intent.putExtra("totalGenres", totalGenres);
+    intent.putExtra("top5Genres", top5Genres);
+    startActivity(intent);
+  }
 }

@@ -27,7 +27,9 @@ public class WrappedScreen2Adapter extends RecyclerView.Adapter<WrappedScreen2Ad
   @NonNull
   @Override
   public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-    View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_wrapped_screen2, parent, false);
+    View view =
+        LayoutInflater.from(parent.getContext())
+            .inflate(R.layout.item_wrapped_screen2, parent, false);
     return new ViewHolder(view);
   }
 
@@ -49,6 +51,7 @@ public class WrappedScreen2Adapter extends RecyclerView.Adapter<WrappedScreen2Ad
   public static class ViewHolder extends RecyclerView.ViewHolder {
     public TextView songNameText, genreText;
     public ImageView imageView;
+
     public ViewHolder(View view) {
       super(view);
       songNameText = view.findViewById(R.id.song_name);

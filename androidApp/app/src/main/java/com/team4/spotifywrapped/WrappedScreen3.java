@@ -40,17 +40,18 @@ public class WrappedScreen3 implements Parcelable {
     return 0;
   }
 
-  public static final Creator<WrappedScreen3> CREATOR = new Creator<WrappedScreen3>() {
-    @Override
-    public WrappedScreen3 createFromParcel(Parcel in) {
-      return new WrappedScreen3(in);
-    }
+  public static final Creator<WrappedScreen3> CREATOR =
+      new Creator<WrappedScreen3>() {
+        @Override
+        public WrappedScreen3 createFromParcel(Parcel in) {
+          return new WrappedScreen3(in);
+        }
 
-    @Override
-    public WrappedScreen3[] newArray(int size) {
-      return new WrappedScreen3[size];
-    }
-  };
+        @Override
+        public WrappedScreen3[] newArray(int size) {
+          return new WrappedScreen3[size];
+        }
+      };
 
   public String getName() {
     return name;

@@ -8,8 +8,6 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import androidx.recyclerview.widget.RecyclerView;
 import com.squareup.picasso.Picasso;
-import com.team4.spotifywrapped.ArtistRecommendation;
-import com.team4.spotifywrapped.R;
 
 import java.util.List;
 
@@ -25,7 +23,9 @@ public class WrappedScreen3Adapter extends RecyclerView.Adapter<WrappedScreen3Ad
 
   @Override
   public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-    View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_artist_recommendation, parent, false);
+    View view =
+        LayoutInflater.from(parent.getContext())
+            .inflate(R.layout.item_artist_recommendation, parent, false);
     return new ViewHolder(view);
   }
 
@@ -46,6 +46,7 @@ public class WrappedScreen3Adapter extends RecyclerView.Adapter<WrappedScreen3Ad
   public static class ViewHolder extends RecyclerView.ViewHolder {
     TextView nameTextView, genreTextView, popularityTextView;
     ImageView imageView;
+
     public ViewHolder(View view) {
       super(view);
       nameTextView = itemView.findViewById(R.id.artist_name);
