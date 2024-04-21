@@ -13,14 +13,13 @@ import com.squareup.picasso.Picasso;
 
 import java.util.List;
 
-public class SongRecommendationsAdapter
-    extends RecyclerView.Adapter<SongRecommendationsAdapter.ViewHolder> {
+public class WrappedScreen2Adapter extends RecyclerView.Adapter<WrappedScreen2Adapter.ViewHolder> {
 
-  private final List<SongRecommendation> songList;
+  private final List<WrappedScreen2> songList;
   private final Context context;
 
   // Constructor
-  public SongRecommendationsAdapter(Context context, List<SongRecommendation> songList) {
+  public WrappedScreen2Adapter(Context context, List<WrappedScreen2> songList) {
     this.context = context;
     this.songList = songList;
   }
@@ -30,14 +29,14 @@ public class SongRecommendationsAdapter
   public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
     View view =
         LayoutInflater.from(parent.getContext())
-            .inflate(R.layout.item_song_recommendation, parent, false);
+            .inflate(R.layout.item_wrapped_screen2, parent, false);
     return new ViewHolder(view);
   }
 
   @SuppressLint("SetTextI18n")
   @Override
   public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-    SongRecommendation song = songList.get(position);
+    WrappedScreen2 song = songList.get(position);
     holder.songNameText.setText(song.getName() + " - " + song.getArtistName());
     holder.genreText.setText("Genre: " + song.getGenre());
     // Assuming you have Picasso or Glide added to your project

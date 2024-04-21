@@ -3,14 +3,14 @@ package com.team4.spotifywrapped;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-public class SongRecommendation implements Parcelable {
+public class WrappedScreen2 implements Parcelable {
   private String name;
   private String imageUrl;
   private String artistName;
   private String genre;
 
   // Updated constructor
-  public SongRecommendation(String name, String imageUrl, String artistName, String genre) {
+  public WrappedScreen2(String name, String imageUrl, String artistName, String genre) {
     this.name = name;
     this.imageUrl = imageUrl;
     this.artistName = artistName;
@@ -18,7 +18,7 @@ public class SongRecommendation implements Parcelable {
   }
 
   // Read from parcel
-  protected SongRecommendation(Parcel in) {
+  protected WrappedScreen2(Parcel in) {
     name = in.readString();
     imageUrl = in.readString();
     artistName = in.readString();
@@ -38,16 +38,16 @@ public class SongRecommendation implements Parcelable {
     return 0;
   }
 
-  public static final Creator<SongRecommendation> CREATOR =
-      new Creator<SongRecommendation>() {
+  public static final Creator<WrappedScreen2> CREATOR =
+      new Creator<WrappedScreen2>() {
         @Override
-        public SongRecommendation createFromParcel(Parcel in) {
-          return new SongRecommendation(in);
+        public WrappedScreen2 createFromParcel(Parcel in) {
+          return new WrappedScreen2(in);
         }
 
         @Override
-        public SongRecommendation[] newArray(int size) {
-          return new SongRecommendation[size];
+        public WrappedScreen2[] newArray(int size) {
+          return new WrappedScreen2[size];
         }
       };
 

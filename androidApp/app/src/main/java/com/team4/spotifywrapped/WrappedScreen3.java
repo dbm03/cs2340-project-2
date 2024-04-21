@@ -3,24 +3,24 @@ package com.team4.spotifywrapped;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-public class ArtistRecommendation implements Parcelable {
+public class WrappedScreen3 implements Parcelable {
   private String name;
   private String imageUrl;
   private String genre; // optional
   private int popularity; // optional
 
-  public ArtistRecommendation(String name, String imageUrl) {
+  public WrappedScreen3(String name, String imageUrl) {
     this(name, imageUrl, "", 0); // Call the main constructor with default values
   }
 
-  public ArtistRecommendation(String name, String imageUrl, String genre, int popularity) {
+  public WrappedScreen3(String name, String imageUrl, String genre, int popularity) {
     this.name = name;
     this.imageUrl = imageUrl;
     this.genre = genre;
     this.popularity = popularity;
   }
 
-  protected ArtistRecommendation(Parcel in) {
+  protected WrappedScreen3(Parcel in) {
     name = in.readString();
     imageUrl = in.readString();
     genre = in.readString();
@@ -40,16 +40,16 @@ public class ArtistRecommendation implements Parcelable {
     return 0;
   }
 
-  public static final Creator<ArtistRecommendation> CREATOR =
-      new Creator<ArtistRecommendation>() {
+  public static final Creator<WrappedScreen3> CREATOR =
+      new Creator<WrappedScreen3>() {
         @Override
-        public ArtistRecommendation createFromParcel(Parcel in) {
-          return new ArtistRecommendation(in);
+        public WrappedScreen3 createFromParcel(Parcel in) {
+          return new WrappedScreen3(in);
         }
 
         @Override
-        public ArtistRecommendation[] newArray(int size) {
-          return new ArtistRecommendation[size];
+        public WrappedScreen3[] newArray(int size) {
+          return new WrappedScreen3[size];
         }
       };
 

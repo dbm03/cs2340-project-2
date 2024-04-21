@@ -11,13 +11,12 @@ import com.squareup.picasso.Picasso;
 
 import java.util.List;
 
-public class ArtistRecommendationsAdapter
-    extends RecyclerView.Adapter<ArtistRecommendationsAdapter.ViewHolder> {
+public class WrappedScreen3Adapter extends RecyclerView.Adapter<WrappedScreen3Adapter.ViewHolder> {
 
-  private List<ArtistRecommendation> artistList;
+  private List<WrappedScreen3> artistList;
   private Context context;
 
-  public ArtistRecommendationsAdapter(Context context, List<ArtistRecommendation> artistList) {
+  public WrappedScreen3Adapter(Context context, List<WrappedScreen3> artistList) {
     this.context = context;
     this.artistList = artistList;
   }
@@ -32,7 +31,7 @@ public class ArtistRecommendationsAdapter
 
   @Override
   public void onBindViewHolder(ViewHolder holder, int position) {
-    ArtistRecommendation artist = artistList.get(position);
+    WrappedScreen3 artist = artistList.get(position);
     holder.nameTextView.setText(artist.getName());
     holder.genreTextView.setText("Genre: " + artist.getGenre());
     holder.popularityTextView.setText("Popularity: " + artist.getPopularity());
