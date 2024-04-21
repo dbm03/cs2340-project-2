@@ -59,6 +59,10 @@ public class GamesFragment extends Fragment {
     private ArrayList<String> bankOfSongs;
     private String currentSong;
 
+    private String currentPlaylist;
+
+    private int playlistorder;
+
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater,
@@ -145,35 +149,34 @@ public class GamesFragment extends Fragment {
                 playlists_without_song.add(entry.getKey());
             }
         }
+        currentPlaylist = randomPlaylist;
+        currentSong = null;
         // print the song, the playlist and the other 2 playlists
-        String txt =
-                "Song: "
-                        + randomSong
-                        + "(Original Playlist: "
-                        + randomPlaylist
-                        + ")\nChoose the playlist: ";
+        String txt =    randomSong +
+                        "\n\nChoose the playlist: \n·1 - ";
         // Print 3 playlists, randomize in which order the original playlist is shown
         // It can either be the first, second or third
         int randomOrder = rand.nextInt(3);
+        playlistorder = randomOrder+1;
         if (randomOrder == 0) {
-            txt += randomPlaylist + "\n";
+            txt += randomPlaylist + "\n·2 - ";
             // Choose randomly another playlist from the ones that don't contain the song
             String playlist1 = playlists_without_song.get(rand.nextInt(playlists_without_song.size()));
-            txt += playlist1 + "\n";
+            txt += playlist1 + "\n·3 - ";
             // Delete the playlist that was chosen from the list
             playlists_without_song.remove(playlist1);
             txt += playlists_without_song.get(rand.nextInt(playlists_without_song.size())) + "\n";
         } else if (randomOrder == 1) {
             String playlist1 = playlists_without_song.get(rand.nextInt(playlists_without_song.size()));
-            txt += playlist1 + "\n";
+            txt += playlist1 + "\n·2 - ";
             playlists_without_song.remove(playlist1);
-            txt += randomPlaylist + "\n";
+            txt += randomPlaylist + "\n·3 - ";
             txt += playlists_without_song.get(rand.nextInt(playlists_without_song.size())) + "\n";
         } else {
             String playlist1 = playlists_without_song.get(rand.nextInt(playlists_without_song.size()));
-            txt += playlist1 + "\n";
+            txt += playlist1 + "\n·2 - ";
             playlists_without_song.remove(playlist1);
-            txt += playlists_without_song.get(rand.nextInt(playlists_without_song.size())) + "\n";
+            txt += playlists_without_song.get(rand.nextInt(playlists_without_song.size())) + "\n·3 - ";
             txt += randomPlaylist + "\n";
         }
 
@@ -318,6 +321,7 @@ public class GamesFragment extends Fragment {
 
         int randomIndex = new Random().nextInt(bankOfSongs.size());
         currentSong = bankOfSongs.get(randomIndex);
+        currentPlaylist= null;
         bankOfSongs.remove(randomIndex);  // Remove the guessed song from the list
 
         String displayedSong = obscureSong(currentSong);
@@ -339,11 +343,31 @@ public class GamesFragment extends Fragment {
     }
 
     public void checkGuess(String guess) {
-        if (guess.equalsIgnoreCase(currentSong)) {
-            Toast.makeText(getContext(), "Correct!", Toast.LENGTH_SHORT).show();
-            playgame2();
-        } else {
-            Toast.makeText(getContext(), "Incorrect! Try again!", Toast.LENGTH_SHORT).show();
+        if (currentPlaylist==null) {
+            if (guess.equalsIgnoreCase(currentSong)) {
+                Toast.makeText(getContext(), "Correct!", Toast.LENGTH_SHORT).show();
+                playgame2();
+            } else {
+                Toast.makeText(getContext(), "Incorrect! Try again!", Toast.LENGTH_SHORT).show();
+            }
+        }
+        else {
+            if (guess.equalsIgnoreCase(currentPlaylist) || guess.equalsIgnoreCase(String.valueOf(playlistorder))) {
+                Toast.makeText(getContext(), "Correct!", Toast.LENGTH_SHORT).show();
+                try {
+                    if (getLocalToken() != null) {
+                        Toast.makeText(getContext(), "Playing game, this may take a while", Toast.LENGTH_SHORT).show();
+                        play_game();
+                    } else {
+                        Toast.makeText(getContext(), "Access Token not available", Toast.LENGTH_SHORT).show();
+                    }
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            } else {
+                System.out.println(playlistorder);
+                Toast.makeText(getContext(), "Incorrect! Try again!", Toast.LENGTH_SHORT).show();
+            }
         }
     }
 

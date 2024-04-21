@@ -620,36 +620,30 @@ public class WrappedFragment extends Fragment {
 
         mCall = mOkHttpClient.newCall(request);
 
-        mCall.enqueue(new Callback() {
-            @Override
-            public void onFailure(Call call, IOException e) {
-                Log.d("HTTP", "Failed to fetch data: " + e);
-                if (getContext() != null) {
-                    Toast.makeText(getContext(), "Failed to fetch data, watch Logcat for more details", Toast.LENGTH_SHORT).show();
-                }
-            }
+        mCall.enqueue(
+                new Callback() {
+                    @Override
+                    public void onFailure(Call call, IOException e) {
+                        Log.d("HTTP", "Failed to fetch data: " + e);
+                        if (getContext() != null) {
+                            Toast.makeText(getContext(), "Failed to fetch data, watch Logcat for more details", Toast.LENGTH_SHORT).show();
+                        }
+                    }
 
-            @Override
-            public void onResponse(Call call, Response response) throws IOException {
-                if (!response.isSuccessful()) {
-                    Log.d("HTTP", "Server returned error: " + response);
-                    return;
-                }
-                try {
-                    final JSONObject jsonObject = new JSONObject(response.body().string());
-                    if (getContext() != null) {
-                        getActivity().runOnUiThread(() -> {
+                    @Override
+                    public void onResponse(Call call, Response response) throws IOException {
+                        try {
+                            final JSONObject jsonObject = new JSONObject(response.body().string());
+                            System.out.println("hey songs done");
                             display_and_save_song(jsonObject, profileTextView);
-                        });
+                        } catch (JSONException e) {
+                            Log.d("JSON", "Failed to parse data: " + e);
+                            if (getContext() != null) {
+                                Toast.makeText(getContext(), "Failed to fetch data, watch Logcat for more details", Toast.LENGTH_SHORT).show();
+                            }
+                        }
                     }
-                } catch (JSONException e) {
-                    Log.d("JSON", "Failed to parse data: " + e);
-                    if (getContext() != null) {
-                        Toast.makeText(getContext(), "Failed to parse data, watch Logcat for more details", Toast.LENGTH_SHORT).show();
-                    }
-                }
-            }
-        });
+                });
     }
 
     /**
@@ -691,6 +685,7 @@ public class WrappedFragment extends Fragment {
                     public void onResponse(Call call, Response response) throws IOException {
                         try {
                             final JSONObject jsonObject = new JSONObject(response.body().string());
+                            System.out.println("hey artists done");
                             display_and_save_artist(jsonObject, profileTextView);
                         } catch (JSONException e) {
                             Log.d("JSON", "Failed to parse data: " + e);
@@ -894,6 +889,7 @@ public class WrappedFragment extends Fragment {
                     public void onResponse(Call call, Response response) throws IOException {
                         try {
                             final JSONObject jsonObject = new JSONObject(response.body().string());
+                            System.out.println("hey genres done");
                             display_and_save_genres(jsonObject, profileTextView);
                         } catch (JSONException e) {
                             Log.d("JSON", "Failed to parse data: " + e);
