@@ -7,80 +7,54 @@
     android:layout_height="match_parent"
     tools:context=".MainMenu">
 
-    <LinearLayout
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/toolbar"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical">
+        android:layout_height="?attr/actionBarSize"
+        android:background="#121212"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:titleTextColor="#FFFFFF"
+        android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
+        app:popupTheme="@style/ThemeOverlay.AppCompat.Light">
+
+        <ImageView
+            android:id="@+id/spotify_logo"
+            android:layout_width="50sp"
+            android:layout_height="50sp"
+            android:layout_marginEnd="8dp"
+            android:src="@drawable/logo"
+            android:scaleType="fitStart" />
 
         <TextView
-            android:id="@+id/token_text_view"
-            android:layout_width="match_parent"
+            android:text="Spotify Wrapped"
+            android:textColor="@android:color/white"
+            android:textSize="16sp"
             android:layout_height="wrap_content"
-            android:layout_margin="8dp"
-            tools:text="Token:" />
+            android:layout_width="wrap_content">
+        </TextView>
 
-        <Button
-            android:id="@+id/token_btn"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_margin="8dp"
-            android:drawableLeft="@drawable/spotify_icon"
-            android:text="Sign in with Spotify" />
+    </androidx.appcompat.widget.Toolbar>
 
-        <Button
-            android:id="@+id/wrapped_btn"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Generate Wrapped" />
+    <FrameLayout
+        android:id="@+id/fragment_container"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toTopOf="@id/bottom_navigation"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/toolbar" />
 
-        <Button
-            android:id="@+id/game_btn"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Where is this song from?" />
-
-        <Button
-            android:id="@+id/game2_btn"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Complete the song name" />
-
-        <Button
-            android:id="@+id/profile_btn"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Get Song Recommendations" />
-
-        <Button
-            android:id="@+id/artist_recom_btn"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Get Artist Recommendations" />
-
-        <Button
-            android:id="@+id/previous_wrapped_btn"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Show Previous Wrappeds" />
-
-        <TextView
-            android:id="@+id/response_text_view"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:textSize="10sp"
-            tools:text="Line 1\nLine 2\nLine 3" />
-
-        <Button
-            android:id="@+id/modify_btn"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Edit account" />
-
-        <Button
-            android:id="@+id/logout_btn"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Log out" />
-    </LinearLayout>
+    <com.google.android.material.bottomnavigation.BottomNavigationView
+        android:id="@+id/bottom_navigation"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="#121212"
+        app:menu="@menu/bottom_menu"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:itemTextColor="@color/nav_item_color"
+        app:itemIconTint="@color/nav_item_color"
+        />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

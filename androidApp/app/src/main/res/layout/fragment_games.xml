@@ -1,0 +1,62 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:gravity="center_horizontal">
+
+    <TextView
+        android:id="@+id/gameTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Guess the Song"
+        android:textSize="32sp"
+        android:textStyle="bold"
+        android:layout_marginBottom="20dp"/>
+
+    <Button
+        android:id="@+id/game_btn"
+        android:layout_width="300dp"
+        android:layout_height="wrap_content"
+        android:text="Where is this song from?"
+        android:textColor="#FFFFFF"
+        android:layout_marginBottom="16dp"/>
+
+    <Button
+        android:id="@+id/game2_btn"
+        android:layout_width="300dp"
+        android:layout_height="wrap_content"
+        android:text="Complete the song name"
+        android:textColor="#FFFFFF"
+        android:layout_marginBottom="16dp"/>
+
+    <TextView
+        android:id="@+id/game_text_view"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="20sp"
+        android:gravity="center"
+        android:padding="10dp"
+        tools:text="Line 1\nLine 2\nLine 3"
+        android:layout_marginBottom="20dp"/>
+
+    <EditText
+        android:id="@+id/guessInput"
+        android:layout_width="300dp"
+        android:layout_height="wrap_content"
+        android:textColor="@color/md_theme_dark_background"
+        android:hint="Type your guess here"
+        android:textColorHint="#888888"
+        android:background="@android:drawable/edit_text"
+        android:padding="10dp"/>
+
+    <Button
+        android:id="@+id/submitGuessBtn"
+        android:layout_width="200dp"
+        android:layout_height="wrap_content"
+        android:text="Submit Guess"
+        android:textColor="#FFFFFF"
+        android:layout_marginTop="16dp"/>
+
+</LinearLayout>
