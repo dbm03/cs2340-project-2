@@ -5,11 +5,11 @@ description: Spotify Wrapped project description
 
 This project is a clone of Spotify Wrapped, a feature that Spotify releases at the end of each year. The app generates a list of the user's top 5 songs, artists, and genres based on their listening habits. The app also provides recommendations for songs and artists based on the user's music tastes. Additionally, the app contains two music-related games that the user can play.
 
-This project implements features based on user stories and requirements provided by the client.
-
 ## Features
 
-### Base user stories
+This project implements features based on user stories and requirements provided by the client.
+
+### User stories
 
 :::note[User story 1 | Wrapped Generation]
 
@@ -17,30 +17,73 @@ As a user, I want to be able to view a presentation of the different aspects of 
 
 :::
 
-:::note[User story 2 | Viewing Previous Wraps and Login]
+For the most basic functionality of the Wrapped which might be to get a Wrapped about the most listened songs, artists and genres of the last year we used API calls from the Spotify API which let us get the top 5 most listened songs, artists or genres of the last year. We had to parse the data received after calling this method and getting the songs, artists and genres needed. Afterwards we just created a fun Wrapped to display all of them in a interactive and colourful way following always the original colours that are characteristic from Spotify.
 
-As a user, I want to be able to create an account and log into to the app so I can view my past Spotify Wrapped summaries.
+![Spotify wrapped music listening tastes](/cs2340-project-2/1-base.png)
 
-:::
+:::note[User story 6 | Games]
 
-To implement this feature, we used Firebase Auth and Firestore to store user data and wrapped information.
+We've made two games for the Wrapped app. The first one of the games is about being able to guess which playlist the song is from and the second one is about completing the name of a song. For the first one of the games we ask the Spotify API to give us the information from the different playlists that the user has. Afterwards we get randomly the playlist where the song will be picked to guess. Finally we will get the other two playlists randomly by checking these new playlists don't have the song selected to evade conflicts. 
 
-<Steps>
+![Spotify Wrapped guess where a song is from game](/cs2340-project-2/wrapped-game2.png)
 
-1. User login: The app allows users to sign up and log in to their Spotify Wrapped account.
+For the second game we will just randomly get one song from all their playlists following the process explained before and parse the name song to prepare the letters that will be hidden on it.
 
-2. Then, the user must login to their Spotify account to access their music data.
-
-</Steps>
-
-### Customizable user stories
-
-:::note[User story 1 | Wrapped Generation]
-
-As a user, I want to be able to view a presentation of the different aspects of my personal Spotify music listening tastes displayed in colorful and fun ways.
+![Spotify Wrapped guess the song game](/cs2340-project-2/wrapped-game1.png)
 
 :::
 
+
+:::note[User story 7 | Artist recommendations]
+
+As a user, I would like new artists recommended to me based on my music tastes.
+
+:::
+
+Our application is capable of suggesting new artists based on the user's and their friends' music tastes. The idea in mind is to create a more connected and discovery-oriented user experience. We achieve this by including two different buttons that the user can interact with to generate recommended songs or recommended artists.
+
+For this we used a Spotify API function that is capable of recommending songs/artists based on a list of songs/artists provided as an argument when calling the method. Getting the songs or artists is simple because we just used methods from the API which provides us the five most listened songs/artists and afterwards we just needed to parse and call the function mentioned before to get recommendations based on these artists or songs.
+
+![Spotify Wrapped homepage](/cs2340-project-2/homepage.png)
+
+![Artist recommendations page](/cs2340-project-2/artist-recommendations.png)
+
+:::note[User story 8 | Different time spans]
+As a user, I would like to control the timespan of the generated Wrapped summary
+:::
+
+To be able to produce seasonally themed Spotify Wrapped we have used the characteristic from Spotify API where you can select a timestamp from the most listened song, artists and music genres. People would be able to select from short-term, medium-term and long-term when asking for a Spotify Wrapped and this would give them a Wrapped about their most listened songs, artists and music genres from the last month (short-term), the sixth last months (medium-term) or the last year (long-term).
+
+![Spotify Wrapped timestamp selector](/cs2340-project-2/wrapped-timespan.png)
+
+:::note[User story 10 | CI/CD pipeline]
+
+As a developer, I would like a CI/CD pipeline to test my code to verify that it builds and is formatted correctly.
+
+:::
+
+We've established a CI/CD pipeline on GitHub using GitHub Actions. This pipeline automates code compilation and runs unit tests, ensuring automatic quality checks with each commit. By integrating unit testing into our workflow, we catch bugs early and maintain code reliability. This streamlined process accelerates feedback loops and enables faster, more confident delivery of high-quality software.
+
+Also, we incorporated automatic code formatting according to Google's Java formatting rules. The Github Action is capable of modifying the source code to make it adhere to the rules and making a commit to the repo with the changes.
+
+:::note[User story 13 | PRs and issue templates]
+
+As a developer, I would like to be able to use pre-made templates for PRs and issues in GitHub.
+
+:::
+
+Through the implementation of our application, we introduced Github Templates to improve the development process. These templates provide a standardised framework for contributions, making them easier to review and ensuring alignment with established guidelines. By using these templates, we've fostered consistency and reliability across our application and development environment.
+
+
+:::note[User story 12 and base user story 2 | Create account]
+
+User story 12: As a user, I would like to be able to sign into my account from any device (Firebase cloud storage instead of SQLite)
+
+Base #2: As a user, I want to be able to create an account and log into to the app so I can view my past Spotify Wrapped summaries.
+
+:::
+
+![Spotify Duowrapped](/cs2340-project-2/2-12.png)
 
 ### User login
 
