@@ -7,7 +7,7 @@ export default defineConfig({
 		starlight({
 			title: 'Spotify Wrapped Clone',
 			social: {
-				github: 'https://github.com/withastro/starlight',
+				github: 'https://github.com/barrosodavid/cs2340-project-2',
 			},
 			sidebar: [
 			],

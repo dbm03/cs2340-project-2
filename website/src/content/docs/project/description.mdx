@@ -3,7 +3,54 @@ title: Project description
 description: Spotify Wrapped project description
 ---
 
+This project is a clone of Spotify Wrapped, a feature that Spotify releases at the end of each year. The app generates a list of the user's top 5 songs, artists, and genres based on their listening habits. The app also provides recommendations for songs and artists based on the user's music tastes. Additionally, the app contains two music-related games that the user can play.
+
+This project implements features based on user stories and requirements provided by the client.
+
 ## Features
+
+### Base user stories
+
+:::note[User story 1 | Wrapped Generation]
+
+As a user, I want to be able to view a presentation of the different aspects of my personal Spotify music listening tastes displayed in colorful and fun ways.
+
+:::
+
+:::note[User story 2 | Viewing Previous Wraps and Login]
+
+As a user, I want to be able to create an account and log into to the app so I can view my past Spotify Wrapped summaries.
+
+:::
+
+To implement this feature, we used Firebase Auth and Firestore to store user data and wrapped information.
+
+<Steps>
+
+1. User login: The app allows users to sign up and log in to their Spotify Wrapped account.
+
+2. Then, the user must login to their Spotify account to access their music data.
+
+</Steps>
+
+### Customizable user stories
+
+:::note[User story 1 | Wrapped Generation]
+
+As a user, I want to be able to view a presentation of the different aspects of my personal Spotify music listening tastes displayed in colorful and fun ways.
+
+:::
+
+
+### User login
+
+In this project, we implemented 
+
+<Card>
+
+</Card>
+
+The app allows users to sign up and log in to their Spotify Wrapped account. Then, the user must login to their Spotify account to access their music data.
 
 - Wrapped Generation: The app is capable of generating a list similar to Spotify Wrapped with the users top 5 songs, artists, and genres. Users can choose to generate a wrapped based upon a specific timeframe.
 
@@ -16,17 +63,19 @@ description: Spotify Wrapped project description
 
 ### Technical features
 
+The app is built for Android devices, using Java. We are using Spotify API to access the user's music data. The app is connected to a Firebase database to store user data and wrapped information.
+
+For this website, we are using Astro Starlight, a static site generator that allows us to create a website using markdown files.
+
 {/* <Icon name="seti:firebase" color="goldenrod" /> */}
 
-<Steps>
+As for the backend, we are using Firebase Auth and Firestore to store user data and wrapped information. We have also implemented a CI/CD pipeline that verifies that the code is built and formatted correctly. Branches that fail CI/CD runs are not allowed to merge into the main on Github.
 
-1. Implemented Firebase database so the app can be signed into from different devices.
+- Implemented Firebase Auth and Firestore to store user data and wrapped information.
 
-2. Contains a CI/CD pipeline allowing for verification that code is built and formatted correctly. Branches that fail CI/CD runs are not allowed to merge into the main on Github.
+- Contains a CI/CD pipeline allowing for verification that code is built and formatted correctly. Branches that fail CI/CD runs are not allowed to merge into the main on Github.
 
-3. Premade templates for PRs and issues are available for Github.
-
-</Steps>
+- Premade templates for PRs and issues are available for Github.
 
 ## Team presentation
 
@@ -36,21 +85,33 @@ This is the team that worked on the project and their contributions
 
 <CardGrid stagger>
 	<Card title="Ismael Zhu Zhou" icon="star">
+		*Scrum Master | Developer | Documentation*
+
 		As Scrum Master, Ismael guided the team and set goals. He primarily contributed to development of the app's backend and documented the project's requirements
 	</Card>
 	<Card title="David Barroso Murcia" icon="add-document">
+		*Product Owner | Developer | Documentation*
+
 		As Product Owner, David defined and prioritized project requirements and ensured they aligned with the client's needs. He primarily contributed to the app's backend and documentation
 	</Card>
 	<Card title="Hans Ibarra" icon="setting">
+		*Developer | Documentation*
+		
 		Hans primarily contributed to the development of the frontend and documentation for the project
 	</Card>
 	<Card title="Eduardo Rodríguez Sánchez" icon="open-book">
+		*Technical Support | Developer | Documentation*
+
 		As the technical support, Eduardo addressed issues that presented themself in the project's development. He primarily contributed to the project's backend and documentation
 	</Card>
 	<Card title="Emilio Hermosa Schiantarelli" icon="open-book">
+		*Technical Support | Developer | Documentation*
+
 		In his role as technical support, Emilio addressed issues that arose during the project's development phase, primarily focusing on backend tasks and documentation
 	</Card>
 	<Card title="Chris Kyslinger" icon="open-book">
+		*Developer | Documentation*
+
 		Chris primarily contributed to the development of the frontend and documentation for the project
 	</Card>
 </CardGrid>
@@ -70,6 +131,13 @@ Trello was also used for the product backlog. For each sprint, a new Trello boar
 Additionally, we utilized WhatsApp as a supplementary communication channel for more immediate discussions. This platform allowed us to quickly address urgent matters and seek clarification on certain tasks.
 
 Overall, our approach to project management encompassed planning, regular client engagement, transparent task management through GitHub and Trello and efficient communication via WhatsApp. These practices enabled us to navigate the complexities of the development process effectively, and to deliver a final product that met the client's expectations.
+
+<Steps>
+
+1. 
+
+
+</Steps>
 
 ### Design
 
